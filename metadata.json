@@ -1,0 +1,5 @@
+{
+  "name": "PolyGuard",
+  "description": "A modular, highly decoupled security infrastructure for Polygon. Engineered with isolated feature modules to ensure zero-regression development and expert-grade resilience.",
+  "requestFramePermissions": []
+}
