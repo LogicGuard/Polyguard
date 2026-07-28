@@ -1,6 +1,6 @@
-
 import React from 'react';
-import { motion } from 'framer-motion';
+// FIX: Imported Variants type from framer-motion for explicit configuration typing.
+import { motion, Variants } from 'framer-motion';
 
 interface CyberpunkLogoProps {
     className?: string;
@@ -12,7 +12,8 @@ const CyberpunkLogo: React.FC<CyberpunkLogoProps> = ({ className = "", hideText 
     const guardPart = "Guard";
 
     // Main Container Variants
-    const container = {
+    // FIX: Explicitly typed container as Variants.
+    const container: Variants = {
         hidden: { opacity: 0 },
         visible: {
             opacity: 1,
@@ -21,7 +22,8 @@ const CyberpunkLogo: React.FC<CyberpunkLogoProps> = ({ className = "", hideText 
     };
 
     // Minimalist Typography Variants
-    const letterVariant = {
+    // FIX: Explicitly typed letterVariant as Variants and cast the ease property to any to allow custom cubic-bezier arrays.
+    const letterVariant: Variants = {
         hidden: { 
             opacity: 0, 
             y: 2,
@@ -31,7 +33,7 @@ const CyberpunkLogo: React.FC<CyberpunkLogoProps> = ({ className = "", hideText 
             y: 0,
             transition: {
                 duration: 0.4,
-                ease: [0.215, 0.610, 0.355, 1.000] // easeOutCubic
+                ease: [0.215, 0.610, 0.355, 1.000] as any // easeOutCubic
             },
         }
     };

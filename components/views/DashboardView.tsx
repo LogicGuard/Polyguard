@@ -1,170 +1,123 @@
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { useWallet } from '../../context/WalletContext';
-import { getPortfolioSnapshot, systemStatusEvents, getSystemStatus } from '../../services/geminiService';
-import { PortfolioSnapshot } from '../../types';
-import Card from '../common/Card';
-import { motion, AnimatePresence } from 'framer-motion';
+import { systemStatusEvents, getSystemStatus } from '../../services/geminiService';
 import IntelligenceBriefing from './IntelligenceBriefing';
 import RealTimeMonitor from './RealTimeMonitor';
-import ToolsQuickAccess from './ToolsQuickAccess';
 import NetworkMatrix from './NetworkMatrix';
-import { SystemVitalsStrip } from './DashboardWidgets';
-import OnboardingTour, { TourStep } from '../common/OnboardingTour';
-import { ThreatIcon } from '../Icons';
+import ToolsQuickAccess from './ToolsQuickAccess';
+import HeuristicMatrix from './HeuristicMatrix';
+import ActivityHeatmap from './ActivityHeatmap';
+import { DashboardMetricCard, SystemVitalsStrip } from './DashboardWidgets';
+import { GlobeIcon, ShieldCheckIcon, ActivityIcon, ZapIcon, ThreatIcon, CpuIcon } from '../Icons';
 
 const DashboardView: React.FC = () => {
     const { account } = useWallet();
-    const [snapshot, setSnapshot] = useState<PortfolioSnapshot | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isTourOpen, setIsTourOpen] = useState(false);
-    const [isSystemCongested, setIsSystemCongested] = useState(getSystemStatus().isCoolingDown);
-    
-    const [showIntel, setShowIntel] = useState(false);
-    const [showMonitor, setShowMonitor] = useState(false);
+    const [isCongested, setIsCongested] = useState(getSystemStatus().isCoolingDown);
 
     useEffect(() => {
-        const handleStatusChange = (e: any) => {
-            setIsSystemCongested(e.detail.isCoolingDown);
-        };
+        const handleStatusChange = (e: any) => setIsCongested(e.detail.isCoolingDown);
         systemStatusEvents.addEventListener('statusChange', handleStatusChange);
         return () => systemStatusEvents.removeEventListener('statusChange', handleStatusChange);
     }, []);
 
-    useEffect(() => {
-        const fetchPrimaryData = async () => {
-            if (!account) {
-                setIsLoading(false);
-                setTimeout(() => setShowIntel(true), 1000);
-                setTimeout(() => setShowMonitor(true), 10000);
-                return;
-            };
-            
-            setIsLoading(true);
-            const snapshotResult = await getPortfolioSnapshot(account);
-            if (!snapshotResult.error) setSnapshot(snapshotResult.data);
-            setIsLoading(false);
-            
-            setTimeout(() => setShowIntel(true), 5000);
-            setTimeout(() => setShowMonitor(true), 15000);
-        };
-        fetchPrimaryData();
-    }, [account]);
+    const containerVariants: Variants = {
+        hidden: { opacity: 0 },
+        visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
+    };
 
-    const TOUR_STEPS: TourStep[] = [
-        { targetId: 'grid-intel', title: 'Intelligence Hub', description: 'Strategic analysis of the Polygon network security state.' },
-        { targetId: 'grid-map', title: 'Tactical Topology', description: 'Real-time visualization of node health and infrastructure health.' },
-        { targetId: 'grid-vitals', title: 'System Vitals', description: 'Telemetry monitoring network congestion and threat vectors.' },
-        { targetId: 'grid-monitor', title: 'Signal Stream', description: 'Low-latency security alert and event processing.' }
-    ];
-
-    const securityScoreColor = useMemo(() => {
-        if (!snapshot) return 'text-gray-600';
-        if (snapshot.securityScore > 80) return 'text-green-400';
-        if (snapshot.securityScore > 50) return 'text-yellow-400';
-        return 'text-red-400';
-    }, [snapshot]);
+    const itemVariants: Variants = {
+        hidden: { y: 10, opacity: 0 },
+        visible: { y: 0, opacity: 1, transition: { duration: 0.4, ease: [0.23, 1, 0.32, 1] } }
+    };
 
     return (
-        <div className="relative h-full w-full bg-[#020202] overflow-x-hidden flex flex-col">
-            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] pointer-events-none z-50"></div>
+        <div className="relative h-full w-full bg-[#020202] overflow-hidden flex flex-col p-4 gap-4 select-none">
+            {/* Minimal Background Elements */}
+            <div className="absolute inset-0 tech-bg opacity-[0.03] pointer-events-none"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-blue-500/[0.02] to-transparent pointer-events-none"></div>
             
-            <AnimatePresence>
-                {isSystemCongested && (
-                    <motion.div 
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="bg-red-500/10 border-b border-red-500/20 px-6 py-2 flex items-center justify-between z-50"
-                    >
-                        <div className="flex items-center gap-3">
-                            <ThreatIcon className="w-4 h-4 text-red-500 animate-pulse" />
-                            <p className="text-[10px] font-mono text-red-400 uppercase tracking-widest font-bold">
-                                SYSTEM_NOTICE: AI Quota Exceeded. Entering cooldown.
-                            </p>
+            <motion.div 
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className="flex-1 flex flex-col gap-4 relative z-10 overflow-hidden"
+            >
+                {/* 1. TOP OPERATIONS RIBBON (QUICK START) */}
+                <motion.div variants={itemVariants} className="flex-shrink-0">
+                    <ToolsQuickAccess />
+                </motion.div>
+
+                {/* 2. TELEMETRY STRIP */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 flex-shrink-0">
+                    <motion.div variants={itemVariants}>
+                        <DashboardMetricCard label="Global_Nodes" value="1,024" sub="99.9% UPTIME" icon={GlobeIcon} color="text-blue-400" />
+                    </motion.div>
+                    <motion.div variants={itemVariants}>
+                        <DashboardMetricCard label="Security_Index" value="98.2" sub="NOMINAL_STATE" icon={ShieldCheckIcon} color="text-green-500" />
+                    </motion.div>
+                    <motion.div variants={itemVariants}>
+                        <DashboardMetricCard label="Assets_Secured" value="$1.42B" sub="VERIFIED_DATA" icon={ActivityIcon} color="text-gray-400" />
+                    </motion.div>
+                    <motion.div variants={itemVariants}>
+                        <DashboardMetricCard label="Active_Shields" value="42,091" sub="KERNEL_ONLINE" icon={ZapIcon} color="text-blue-500" />
+                    </motion.div>
+                </div>
+
+                {/* 3. MAIN OPERATIONAL HUD - RESTRUCTURED GRID */}
+                <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-0 overflow-hidden">
+                    
+                    {/* LEFT AREA: TOPOLOGY & HEURISTICS */}
+                    <div className="lg:col-span-8 flex flex-col gap-4 min-h-0 overflow-hidden">
+                        <div className="flex-[3] grid grid-cols-1 md:grid-cols-12 gap-4 min-h-0">
+                             <motion.div variants={itemVariants} className="md:col-span-8 min-h-0 h-full">
+                                <NetworkMatrix />
+                             </motion.div>
+                             <motion.div variants={itemVariants} className="md:col-span-4 min-h-0 h-full">
+                                <ActivityHeatmap />
+                             </motion.div>
                         </div>
-                        <span className="text-[9px] font-mono text-red-500/50 uppercase hidden sm:inline">Attempting reconnection in 60s</span>
+                        
+                        <div className="flex-[2] grid grid-cols-1 md:grid-cols-12 gap-4 min-h-0">
+                            <motion.div variants={itemVariants} className="md:col-span-7 min-h-0 h-full">
+                                <HeuristicMatrix />
+                            </motion.div>
+                            <motion.div variants={itemVariants} className="md:col-span-5 min-h-0 h-full">
+                                <IntelligenceBriefing />
+                            </motion.div>
+                        </div>
+                    </div>
+
+                    {/* RIGHT AREA: LIVE FEED & VITALS */}
+                    <div className="lg:col-span-4 flex flex-col gap-4 min-h-0 overflow-hidden">
+                        <motion.div variants={itemVariants} className="flex-[3] min-h-0 h-full">
+                            <RealTimeMonitor />
+                        </motion.div>
+                        <motion.div variants={itemVariants} className="flex-[1] min-h-0 h-full">
+                            <SystemVitalsStrip />
+                        </motion.div>
+                    </div>
+                </div>
+            </motion.div>
+
+            {/* ALERT SYSTEM */}
+            <AnimatePresence>
+                {isCongested && (
+                    <motion.div 
+                        initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 50 }}
+                        className="fixed bottom-6 right-6 z-[200] w-80 bg-[#0A0A0A] border border-blue-900/30 shadow-2xl p-4 tactical-border"
+                    >
+                        <div className="flex items-center gap-3 text-blue-500 mb-2">
+                            <ThreatIcon className="w-4 h-4 animate-pulse" />
+                            <span className="text-[10px] font-black font-mono uppercase tracking-widest">Buffer_Threshold</span>
+                        </div>
+                        <p className="text-[9px] font-mono text-gray-500 uppercase leading-relaxed">
+                            System throughput calibrated for high-density signals.
+                        </p>
                     </motion.div>
                 )}
             </AnimatePresence>
-
-            <div className="flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 lg:p-6 overflow-y-auto lg:overflow-hidden">
-                
-                {/* COLUMN 1: Intelligence & Defense (Span 3 on Desktop) */}
-                <div className="lg:col-span-3 flex flex-col gap-4 min-h-[500px] lg:min-h-0">
-                    <div className="flex-[3] min-h-0" id="grid-intel">
-                        {showIntel ? (
-                            <IntelligenceBriefing />
-                        ) : (
-                            <Card className="h-full cyber-card flex items-center justify-center p-6 bg-black/20">
-                                <div className="text-center">
-                                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-sm mx-auto mb-2 animate-pulse"></div>
-                                    <span className="text-[9px] font-mono text-gray-700 uppercase tracking-widest">Synchronizing_Briefing...</span>
-                                </div>
-                            </Card>
-                        )}
-                    </div>
-                    
-                    <div className="flex-[1.2] min-h-[140px] lg:min-h-0">
-                        <Card className="h-full cyber-card p-0 flex flex-col overflow-hidden bg-black/40 border-white/10">
-                            <div className="p-2 border-b border-white/5 bg-white/[0.02] flex justify-between items-center">
-                                <span className="text-[9px] font-mono font-bold text-gray-500 uppercase tracking-widest">Defense_Core</span>
-                                <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)] animate-pulse"></div>
-                            </div>
-                            <div className="flex-1 flex flex-col justify-center items-center p-2 relative">
-                                <div className="absolute inset-0 opacity-10 flex items-center justify-center">
-                                    <div className="w-24 h-24 border border-white/20 rounded-full"></div>
-                                </div>
-                                <div className="text-[8px] font-mono text-gray-600 uppercase mb-1 z-10">Security_Level</div>
-                                <div className={`text-5xl lg:text-6xl font-bold font-mono tracking-tighter z-10 ${securityScoreColor}`}>
-                                    {snapshot ? snapshot.securityScore : (isLoading ? '..' : '--')}
-                                </div>
-                            </div>
-                        </Card>
-                    </div>
-                </div>
-
-                {/* COLUMN 2: Tactical Matrix & Vitals (Span 6 on Desktop) */}
-                <div className="lg:col-span-6 flex flex-col gap-4 min-h-[600px] lg:min-h-0 order-first lg:order-none">
-                    <div className="flex-[4] min-h-0 relative" id="grid-map">
-                        <NetworkMatrix />
-                    </div>
-                    
-                    <div className="flex-[1.5] min-h-[160px] lg:min-h-0" id="grid-vitals">
-                        <SystemVitalsStrip />
-                    </div>
-                </div>
-
-                {/* COLUMN 3: Signal Stream & Tools (Span 3 on Desktop) */}
-                <div className="lg:col-span-3 flex flex-col gap-4 min-h-[600px] lg:min-h-0">
-                    <div className="flex-[3] min-h-0" id="grid-monitor">
-                        {showMonitor ? (
-                            <RealTimeMonitor />
-                        ) : (
-                            <Card className="h-full flex flex-col bg-[#050505] border-white/10 items-center justify-center p-6">
-                                <div className="text-center">
-                                    <div className="w-4 h-4 border-2 border-t-transparent border-blue-500 rounded-full animate-spin mx-auto mb-3"></div>
-                                    <span className="text-[9px] font-mono text-gray-700 uppercase tracking-[0.2em]">Intercepting_Signals...</span>
-                                </div>
-                            </Card>
-                        )}
-                    </div>
-
-                    <div className="flex-[2] min-h-0" id="grid-tools">
-                        <ToolsQuickAccess />
-                    </div>
-                </div>
-            </div>
-            
-            <OnboardingTour 
-                steps={TOUR_STEPS}
-                isOpen={isTourOpen}
-                onClose={() => setIsTourOpen(false)}
-                onComplete={() => {
-                    setIsTourOpen(false);
-                    localStorage.setItem('polyguard_dashboard_tour_seen_v3', 'true');
-                }}
-            />
         </div>
     );
 };

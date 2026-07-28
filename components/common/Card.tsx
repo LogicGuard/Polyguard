@@ -5,9 +5,11 @@ interface CardProps {
   children: React.ReactNode;
   className?: string;
   onClick?: () => void;
+  // FIX: Added style property to allow passing custom CSS styles to the card component.
+  style?: React.CSSProperties;
 }
 
-const Card: React.FC<CardProps> = ({ children, className = "", onClick }) => {
+const Card: React.FC<CardProps> = ({ children, className = "", onClick, style }) => {
   const isInteractive = !!onClick;
 
   return (
@@ -19,6 +21,8 @@ const Card: React.FC<CardProps> = ({ children, className = "", onClick }) => {
         boxShadow: "0 10px 30px -10px rgba(0,0,0,0.5), 0 0 15px 0 rgba(255,255,255,0.03)"
       } : {}}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      // FIX: Applied the style prop to the motion.div element.
+      style={style}
       className={`relative bg-[#080808] border border-white/10 ${isInteractive ? 'cursor-pointer' : ''} ${className}`}
       onClick={onClick}
     >

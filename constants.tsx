@@ -30,13 +30,14 @@ import LiveAssistantView from './components/views/LiveAssistantView';
 import NodeHealthView from './components/views/NodeHealthView';
 import SecurityOpsView from './components/views/SecurityOpsView';
 import BrandKitView from './components/views/BrandKitView';
+import PitchDeckView from './components/views/PitchDeckView';
 
 // Import all icons
 import {
     DashboardIcon, AuditorIcon, TransactionIcon, FirewallIcon, WalletIcon, PortfolioIcon, NFTIcon,
     BridgeIcon, StakingIcon, QuantumIcon, ZKIcon, ComplianceIcon, OnChainIcon, EcosystemIcon,
     GrowthIcon, ThreatIntelIcon, GasIcon, PerformanceIcon, DAOIcon, DAppIcon, AnalyticsIcon,
-    UserBehaviorIcon, ShieldCheckIcon, HelpCircleIcon, MicIcon, GlobeIcon, ActivityIcon, LayersIcon
+    UserBehaviorIcon, ShieldCheckIcon, HelpCircleIcon, MicIcon, GlobeIcon, ActivityIcon, LayersIcon, StarIcon
 } from './components/Icons';
 
 export const NAV_ITEMS: NavItem[] = [
@@ -114,6 +115,7 @@ export const NAV_ITEMS: NavItem[] = [
         icon: HelpCircleIcon, 
         subItems: [
             { id: 'intro', label: 'System Overview', icon: HelpCircleIcon, component: TechnicalDocsView },
+            { id: 'pitch-deck', label: 'Investor Pitch Deck', icon: StarIcon, component: PitchDeckView },
             { id: 'brand-kit', label: 'Brand Kit', icon: LayersIcon, component: BrandKitView },
         ]
     },

@@ -1,154 +1,57 @@
+
 import React from 'react';
 import Card from '../common/Card';
-import { 
-    TransactionIcon, 
-    ShieldCheckIcon, 
-    WalletIcon, 
-    AuditorIcon, 
-    GasIcon, 
-    FirewallIcon,
-    PortfolioIcon,
-    NFTIcon
-} from '../Icons';
-import { useNavigation } from '../../context/NavigationContext';
 import { motion } from 'framer-motion';
+import { useNavigation } from '../../context/NavigationContext';
+import { WalletIcon, FirewallIcon, AuditorIcon, TransactionIcon, PlusIcon } from '../Icons';
 
-const tools = [
-    { 
-        id: 'transaction', 
-        label: 'TX Analyzer', 
-        icon: TransactionIcon,
-        targetPrimary: 'real-time-security',
-        targetSecondary: 'transaction-analysis',
-        color: 'text-purple-400',
-        borderColor: 'border-purple-500/20'
-    },
-    { 
-        id: 'scanner', 
-        label: 'Contract Scanner', 
-        icon: ShieldCheckIcon,
-        targetPrimary: 'security-audits',
-        targetSecondary: 'smart-contract-scanner',
-        color: 'text-blue-400',
-        borderColor: 'border-blue-500/20'
-    },
-    { 
-        id: 'wallet', 
-        label: 'Wallet Report', 
-        icon: WalletIcon,
-        targetPrimary: 'asset-intelligence',
-        targetSecondary: 'wallet-report',
-        color: 'text-green-400',
-        borderColor: 'border-green-500/20'
-    },
-    { 
-        id: 'portfolio', 
-        label: 'Portfolio Analysis', 
-        icon: PortfolioIcon,
-        targetPrimary: 'asset-intelligence',
-        targetSecondary: 'portfolio-analysis',
-        color: 'text-indigo-400',
-        borderColor: 'border-indigo-500/20'
-    },
-    { 
-        id: 'nft', 
-        label: 'NFT Analysis', 
-        icon: NFTIcon,
-        targetPrimary: 'asset-intelligence',
-        targetSecondary: 'nft-analysis',
-        color: 'text-pink-400',
-        borderColor: 'border-pink-500/20'
-    },
-    { 
-        id: 'auditor', 
-        label: 'Logic Auditor', 
-        icon: AuditorIcon,
-        targetPrimary: 'security-audits',
-        targetSecondary: 'smart-contract-auditor',
-        color: 'text-cyan-400',
-        borderColor: 'border-cyan-500/20'
-    },
-    { 
-        id: 'gas', 
-        label: 'Gas Engine', 
-        icon: GasIcon,
-        targetPrimary: 'optimization-strategy',
-        targetSecondary: 'gas-optimizer',
-        color: 'text-yellow-400',
-        borderColor: 'border-yellow-500/20'
-    },
-    { 
-        id: 'firewall', 
-        label: 'Firewall', 
-        icon: FirewallIcon,
-        targetPrimary: 'real-time-security',
-        targetSecondary: 'smart-contract-firewall',
-        color: 'text-red-400',
-        borderColor: 'border-red-500/20'
-    },
+const TOOLS = [
+    { label: 'WALLET_DOSSIER', icon: WalletIcon, pid: 'asset-intelligence', sid: 'wallet-report', desc: 'Scan Identity' },
+    { label: 'TX_INSPECTOR', icon: TransactionIcon, pid: 'real-time-security', sid: 'transaction-analysis', desc: 'Decode Signals' },
+    { label: 'FIREWALL_CORE', icon: FirewallIcon, pid: 'real-time-security', sid: 'smart-contract-firewall', desc: 'Simulate Shield' },
+    { label: 'AUDIT_KERNEL', icon: AuditorIcon, pid: 'security-audits', sid: 'smart-contract-auditor', desc: 'Verify Logic' },
 ];
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05
-    }
-  }
-};
-
-const itemVariants = {
-  hidden: { y: 10, opacity: 0 },
-  visible: { y: 0, opacity: 1 }
-};
 
 const ToolsQuickAccess: React.FC = () => {
     const { navigateTo } = useNavigation();
-
     return (
-        <Card className="p-0 h-full flex flex-col bg-[#050505] overflow-hidden border-white/10 shadow-2xl">
-            <div className="p-3 border-b border-white/5 bg-[#080808] flex justify-between items-center">
-                <h2 className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.2em] font-bold">Quick_Operations_Uplink</h2>
-                <div className="flex gap-1">
-                    <div className="w-1 h-1 rounded-full bg-white/20"></div>
-                    <div className="w-1 h-1 rounded-full bg-white/20"></div>
-                </div>
+        <Card className="bg-[#080808]/80 backdrop-blur-md p-2 border-white/5 flex items-center gap-2 shadow-2xl rounded-none relative overflow-hidden">
+            {/* HUD Decoration */}
+            <div className="absolute top-0 left-0 w-24 h-[1px] bg-blue-500 opacity-50"></div>
+            
+            <div className="px-4 border-r border-white/10 flex flex-col justify-center mr-2">
+                <span className="text-[8px] font-black text-blue-500 uppercase tracking-[0.4em] font-mono">Operations</span>
+                <span className="text-[10px] font-black text-white uppercase font-mono tracking-tighter">QUICK_START</span>
             </div>
-            <motion.div 
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="p-4 grid grid-cols-2 gap-3 flex-1 overflow-y-auto custom-scrollbar"
-            >
-                {tools.map((tool) => (
-                    <motion.div
-                        key={tool.id}
-                        variants={itemVariants}
-                        whileHover={{ 
-                          scale: 1.03, 
-                          y: -2,
-                          transition: { duration: 0.2 }
-                        }}
-                        whileTap={{ scale: 0.97 }}
-                        onClick={() => navigateTo(tool.targetPrimary, tool.targetSecondary)}
-                        className={`bg-black/60 border ${tool.borderColor} rounded-sm flex flex-col items-center justify-center p-3
-                                   hover:bg-white/[0.04] transition-all duration-300 cursor-pointer relative group overflow-hidden`}
+
+            <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-2">
+                {TOOLS.map((tool, i) => (
+                    <motion.button
+                        key={i}
+                        whileHover={{ backgroundColor: 'rgba(255,255,255,0.03)', borderColor: 'rgba(59, 130, 246, 0.3)' }}
+                        onClick={() => navigateTo(tool.pid, tool.sid)}
+                        className="flex items-center gap-3 p-2.5 border border-white/5 text-left group transition-all relative overflow-hidden"
                     >
-                        {/* Hover Gradient Overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        
-                        <tool.icon className={`w-6 h-6 mb-2 ${tool.color} group-hover:scale-110 transition-transform duration-300 relative z-10`} />
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-gray-400 group-hover:text-white transition-colors relative z-10 text-center">{tool.label}</p>
-                        
-                        {/* Corner Accent */}
-                        <div className={`absolute top-0 right-0 w-1 h-1 border-t border-r ${tool.borderColor} group-hover:border-white transition-colors`}></div>
-                        <div className={`absolute bottom-0 left-0 w-1 h-1 border-b border-l ${tool.borderColor} group-hover:border-white transition-colors`}></div>
-                    </motion.div>
+                        <div className="p-1.5 bg-white/5 rounded-sm group-hover:bg-blue-500/10 transition-colors">
+                            <tool.icon className="w-4 h-4 text-gray-500 group-hover:text-blue-400 transition-colors" />
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                            <span className="text-[9px] font-black text-white font-mono truncate uppercase tracking-widest">{tool.label}</span>
+                            <span className="text-[7px] font-mono text-gray-600 uppercase group-hover:text-gray-400 transition-colors">{tool.desc}</span>
+                        </div>
+                        {/* Interactive Sparkle */}
+                        <div className="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <PlusIcon className="w-2 h-2 text-blue-500/50" />
+                        </div>
+                    </motion.button>
                 ))}
-            </motion.div>
-            <div className="p-2 border-t border-white/5 bg-black/40 text-center">
-                 <span className="text-[8px] font-mono text-gray-600 uppercase tracking-tighter">Latency: 14ms // Secure Link Active</span>
+            </div>
+
+            <div className="hidden lg:flex px-4 border-l border-white/10 flex-col items-end">
+                <span className="text-[8px] font-mono text-gray-600 uppercase">Handshake</span>
+                <div className="flex gap-0.5 mt-0.5">
+                    {[1,2,3].map(i => <div key={i} className="w-1 h-1 bg-green-500 rounded-full animate-pulse"></div>)}
+                </div>
             </div>
         </Card>
     );

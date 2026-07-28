@@ -3,15 +3,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Textarea } from '../common/Input';
 import Button from '../common/Button';
 import Card from '../common/Card';
-import { analyzeWithGemini } from '../../services/geminiService';
-import ResultDisplay from '../common/ResultDisplay';
-import { AuditorIcon, CpuIcon, ShieldCheckIcon, ActivityIcon } from '../Icons';
+import { analyzeSmartContractAudit } from '../../services/geminiService';
+import { SmartContractAuditResult } from '../../types';
+import { AuditorIcon, CpuIcon, ShieldCheckIcon, ActivityIcon, ZapIcon, ThreatIcon } from '../Icons';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const SmartContractAuditorView: React.FC = () => {
     const [code, setCode] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [result, setResult] = useState<string | null>(null);
+    const [result, setResult] = useState<SmartContractAuditResult | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [scanProgress, setScanProgress] = useState(0);
     const [mockLogs, setMockLogs] = useState<string[]>([]);
@@ -50,9 +50,7 @@ const SmartContractAuditorView: React.FC = () => {
             }
         }, 800);
 
-        const prompt = `Act as an expert smart contract auditor. Analyze the following Solidity code. Identify security vulnerabilities, categorize them by severity (Critical, High, Medium, Low), and suggest gas optimization improvements. Provide a professional audit report in Markdown format.\n\n\`\`\`solidity\n${code}\n\`\`\``;
-        
-        const { data, error: apiError } = await analyzeWithGemini(prompt);
+        const { data, error: apiError } = await analyzeSmartContractAudit(code);
         
         clearInterval(logIntervalRef.current);
         
@@ -64,6 +62,14 @@ const SmartContractAuditorView: React.FC = () => {
         }
 
         setIsLoading(false);
+    };
+
+    const getSeverityStyles = (severity: string) => {
+        const s = severity.toLowerCase();
+        if (s.includes('critical') || s.includes('high')) return 'text-red-400 bg-red-500/10 border-red-500/20';
+        if (s.includes('medium')) return 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20';
+        if (s.includes('low')) return 'text-blue-400 bg-blue-500/10 border-blue-500/20';
+        return 'text-gray-400 bg-white/5 border-white/10';
     };
 
     return (
@@ -92,7 +98,7 @@ const SmartContractAuditorView: React.FC = () => {
 
             <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-0">
                 {/* EDITOR SIDE */}
-                <div className="lg:col-span-6 flex flex-col h-[500px] lg:h-full overflow-hidden">
+                <div className="lg:col-span-5 flex flex-col h-[400px] lg:h-full overflow-hidden">
                      <div className="bg-[#0A0A0A] border border-white/10 border-b-0 p-2 px-4 flex justify-between items-center text-[10px] font-mono text-gray-500 rounded-t-sm">
                         <div className="flex items-center gap-4">
                             <span className="text-white font-bold">SOURCE_BUFFER.SOL</span>
@@ -133,7 +139,7 @@ const SmartContractAuditorView: React.FC = () => {
                 </div>
             
                 {/* OUTPUT SIDE */}
-                <div className="lg:col-span-6 flex flex-col h-[500px] lg:h-full overflow-hidden">
+                <div className="lg:col-span-7 flex flex-col h-full min-h-0">
                     <AnimatePresence mode="wait">
                         {isLoading ? (
                             <motion.div
@@ -175,18 +181,79 @@ const SmartContractAuditorView: React.FC = () => {
                         ) : result ? (
                             <motion.div
                                 key="result"
-                                initial={{ opacity: 0, scale: 0.98 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                className="h-full flex flex-col overflow-hidden"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="h-full flex flex-col overflow-y-auto custom-scrollbar pr-2 space-y-6"
                             >
-                                <div className="bg-[#0A0A0A] border border-white/10 border-b-0 p-2 px-4 flex justify-between items-center text-[10px] font-mono text-gray-500 rounded-t-sm">
-                                    <div className="flex items-center gap-4">
-                                        <span className="text-green-400 font-bold uppercase tracking-widest">Audit_Report.md</span>
-                                    </div>
-                                    <ShieldCheckIcon className="w-3.5 h-3.5 text-green-500" />
+                                {/* Summary HUD */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <Card className="p-4 bg-[#080808] border-white/10 flex flex-col justify-center items-center text-center">
+                                        <span className="text-[8px] font-mono text-gray-500 uppercase tracking-widest mb-1">Security_Score</span>
+                                        <div className={`text-4xl font-black font-mono ${result.securityScore > 80 ? 'text-green-500' : result.securityScore > 50 ? 'text-yellow-500' : 'text-red-500'}`}>
+                                            {result.securityScore}
+                                        </div>
+                                    </Card>
+                                    <Card className="p-4 bg-[#080808] border-white/10 flex flex-col justify-center items-center text-center">
+                                        <span className="text-[8px] font-mono text-gray-500 uppercase tracking-widest mb-1">Risk_Level</span>
+                                        <div className={`text-xl font-black font-mono uppercase ${result.riskLevel === 'Low' ? 'text-green-500' : 'text-red-500'}`}>
+                                            {result.riskLevel}
+                                        </div>
+                                    </Card>
+                                    <Card className="p-4 bg-blue-500/5 border-blue-500/20 flex flex-col justify-center">
+                                        <p className="text-[9px] font-mono text-gray-400 leading-tight italic">
+                                            <span className="text-blue-500 font-bold mr-1">Summary:</span>
+                                            {result.summary}
+                                        </p>
+                                    </Card>
                                 </div>
-                                <div className="flex-1 overflow-y-auto custom-scrollbar border border-white/10 bg-[#050505] p-2">
-                                    <ResultDisplay content={result} />
+
+                                {/* Vulnerabilities Breakdown */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-3 mb-2 border-l-2 border-red-500 pl-4">
+                                        <ThreatIcon className="w-5 h-5 text-red-500" />
+                                        <h2 className="text-sm font-black text-white uppercase tracking-widest">Security_Vulnerabilities</h2>
+                                    </div>
+                                    
+                                    {result.vulnerabilities.length === 0 ? (
+                                        <div className="p-6 bg-green-500/5 border border-green-500/20 rounded-sm text-center">
+                                            <ShieldCheckIcon className="w-8 h-8 text-green-500 mx-auto mb-2" />
+                                            <p className="text-xs font-mono text-green-400 uppercase">No Immediate Vulnerabilities Detected</p>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 gap-3">
+                                            {result.vulnerabilities.map((v, i) => (
+                                                <Card key={i} className={`p-4 border group hover:scale-[1.01] transition-all ${getSeverityStyles(v.severity)}`}>
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <h3 className="text-xs font-black uppercase tracking-tight">{v.title}</h3>
+                                                        <span className="text-[8px] font-bold px-2 py-0.5 border border-current rounded-sm uppercase tracking-widest">
+                                                            {v.severity}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-[11px] font-mono opacity-70 leading-relaxed">{v.description}</p>
+                                                </Card>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Gas Optimizations Breakdown */}
+                                <div className="space-y-4 pb-12">
+                                    <div className="flex items-center gap-3 mb-2 border-l-2 border-yellow-500 pl-4">
+                                        <ZapIcon className="w-5 h-5 text-yellow-500" />
+                                        <h2 className="text-sm font-black text-white uppercase tracking-widest">Gas_Optimization_Buffer</h2>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 gap-3">
+                                        {result.gasOptimizations.map((g, i) => (
+                                            <Card key={i} className="p-4 bg-white/[0.02] border-white/5 group hover:border-yellow-500/30 transition-all">
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <h3 className="text-[11px] font-bold text-gray-200 uppercase">{g.suggestion}</h3>
+                                                    <span className="text-[9px] font-mono text-yellow-500 font-bold">Est. Save: {g.estimatedSaving}</span>
+                                                </div>
+                                                <p className="text-[10px] font-mono text-gray-500 leading-relaxed">{g.details}</p>
+                                            </Card>
+                                        ))}
+                                    </div>
                                 </div>
                             </motion.div>
                         ) : (

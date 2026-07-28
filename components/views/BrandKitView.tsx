@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Card from '../common/Card';
 import Button from '../common/Button';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheckIcon, ZapIcon, LayersIcon, PlusIcon, RefreshIcon, CheckCircleIcon, CheckIcon, SearchIcon } from '../Icons';
+import { ShieldCheckIcon, ZapIcon, LayersIcon, PlusIcon, RefreshIcon, CheckCircleIcon, CheckIcon, SearchIcon, CodeIcon, ClockIcon } from '../Icons';
 import CyberpunkLogo from '../landing/CyberpunkLogo';
 
 const COLORS = [
@@ -39,23 +39,13 @@ const BrandKitView: React.FC = () => {
             const svgContent = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
     <rect width="500" height="500" fill="#020202"/>
-    <!-- Outer Shield Frame -->
     <path d="M250 50 L450 150 V350 L250 450 L50 350 V150 L250 50Z" fill="none" stroke="#7b3fe4" stroke-width="20" stroke-linejoin="round"/>
-    <!-- Inner Geometric Core -->
     <path d="M250 120 L370 200 L250 280 L130 200 Z" fill="#7b3fe4"/>
     <path d="M250 280 L370 360 L250 440 L130 360 Z" fill="#7b3fe4" opacity="0.7"/>
-    <!-- Institutional Typography Mock -->
     <text x="250" y="480" font-family="Arial, sans-serif" font-size="24" fill="#ffffff" text-anchor="middle" font-weight="bold" letter-spacing="10">POLYGUARD DEFENSE</text>
-    <defs>
-        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="15" result="blur" />
-            <feComposite in="SourceGraphic" in2="blur" operator="over" />
-        </filter>
-    </defs>
 </svg>`.trim();
             blob = new Blob([svgContent], { type: 'image/svg+xml' });
         } else if (asset.format === 'PNG' || asset.format === 'JPG') {
-            // Create a valid 1x1 base64 encoded pixel but with a larger blob size to simulate weight
             const base64Pixel = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
             const byteCharacters = atob(base64Pixel);
             const byteNumbers = new Array(byteCharacters.length);
@@ -65,7 +55,6 @@ const BrandKitView: React.FC = () => {
             const byteArray = new Uint8Array(byteNumbers);
             blob = new Blob([byteArray], { type: asset.mime });
         } else {
-            // Generate a Professional Technical Spec Text File (Mime: PDF is tricky, usually we'd serve a real file)
             const docContent = `
 [SYSTEM_DOCUMENTATION_HEADER]
 VERSION: 3.2.0-PRO
@@ -75,21 +64,6 @@ ENCRYPTION: AES-256-GCM
 PROJECT: POLYGUARD SECURITY AGENT
 MODULE: BRAND_IDENTITY_PROTOCOL
 TIMESTAMP: ${new Date().toISOString()}
-
-1. CORE MISSION
-PolyGuard operates as the primary defense layer for the Polygon AggLayer. 
-The visual identity reflects strength, transparency, and geometric precision.
-
-2. COLOR REQUISITIONS
-- POLYGON_PURPLE: #7B3FE4 (Signal Base)
-- CYBER_BLUE: #3B82F6 (Action State)
-- ALERT_RED: #EF4444 (Threat Vector)
-
-3. TYPOGRAPHY KERNEL
-Primary Sans: Inter (Variable)
-Secondary Mono: JetBrains Mono (Technical)
-
-[SECURE_PAYLOAD_TERMINATED]
 `.trim();
             blob = new Blob([docContent], { type: 'text/plain' });
         }
@@ -227,28 +201,175 @@ Secondary Mono: JetBrains Mono (Technical)
                     <div className="w-1 h-4 bg-white"></div>
                     <h2 className="text-[11px] font-mono font-black text-white uppercase tracking-[0.4em]">Typographic_Engine</h2>
                 </div>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <Card className="p-10 bg-[#080808] border-white/10 relative group overflow-hidden">
-                        <div className="absolute top-0 right-0 p-4 opacity-[0.02] scale-[4] rotate-12 pointer-events-none font-black text-white">INTER</div>
-                        <span className="text-[8px] font-mono text-gray-600 uppercase font-black block mb-6 tracking-[0.2em]">Primary_Sans: Inter / Regular - Black</span>
-                        <div className="space-y-6">
-                            <p className="text-5xl font-black text-white tracking-tighter leading-none">ABCDEFGHIJK <br/> LMNOPQRSTUV</p>
-                            <p className="text-2xl font-bold text-gray-300 leading-tight">THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG.</p>
-                            <div className="pt-4 flex gap-4">
-                                <div className="text-[10px] font-mono text-blue-500 uppercase font-black">Kern: Auto</div>
-                                <div className="text-[10px] font-mono text-blue-500 uppercase font-black">Case: Adaptive</div>
+                <div className="grid grid-cols-1 gap-12">
+                    {/* Inter Specimen */}
+                    <Card className="p-0 bg-[#080808] border-white/10 overflow-hidden relative group">
+                        <div className="absolute top-0 right-0 p-8 opacity-[0.02] scale-[5] rotate-12 pointer-events-none font-black text-white">INTER</div>
+                        
+                        <div className="p-6 border-b border-white/5 bg-[#0A0A0A] flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <div className="p-1.5 bg-blue-500/10 rounded-sm border border-blue-500/20">
+                                    <ShieldCheckIcon className="w-4 h-4 text-blue-400" />
+                                </div>
+                                <div>
+                                    <h3 className="text-[10px] font-black text-white uppercase tracking-widest leading-none">Primary_Sans</h3>
+                                    <span className="text-[8px] font-mono text-gray-500 uppercase tracking-widest">Inter / Variable / Variable Optical Size</span>
+                                </div>
+                            </div>
+                            <span className="text-[8px] font-mono text-gray-600 uppercase tracking-widest">Weights: 100 - 900</span>
+                        </div>
+
+                        <div className="p-10 lg:p-16 grid grid-cols-1 lg:grid-cols-12 gap-16 relative z-10">
+                            <div className="lg:col-span-7 space-y-12">
+                                <div className="space-y-4">
+                                    <span className="text-[8px] font-mono text-blue-500 uppercase font-bold tracking-[0.3em]">H1_Display</span>
+                                    <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter leading-[0.85] uppercase">
+                                        Sovereign <br/> Defense.
+                                    </h1>
+                                </div>
+                                <div className="space-y-4">
+                                    <span className="text-[8px] font-mono text-blue-500 uppercase font-bold tracking-[0.3em]">H2_Heading</span>
+                                    <h2 className="text-3xl md:text-5xl font-black text-gray-200 tracking-tight leading-none uppercase">
+                                        Algorithmic Integrity <br/> Unified Buffer.
+                                    </h2>
+                                </div>
+                                <div className="space-y-4">
+                                    <span className="text-[8px] font-mono text-blue-500 uppercase font-bold tracking-[0.3em]">Body_Primary</span>
+                                    <p className="text-lg text-gray-400 font-light leading-relaxed max-w-xl">
+                                        The quick brown fox jumps over the lazy dog. PolyGuard utilizes Inter as its primary typeface to convey precision, authority, and industrial clarity across all UI primitives.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div className="lg:col-span-5 border-l border-white/5 pl-12 space-y-12">
+                                <div>
+                                    <span className="text-[8px] font-mono text-gray-600 uppercase font-black block mb-6 tracking-widest">Weight_Scale</span>
+                                    <div className="space-y-4">
+                                        <div className="flex items-center gap-6">
+                                            <span className="text-4xl font-black text-white w-12 text-center">Aa</span>
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] text-white font-black uppercase">900 Black</span>
+                                                <span className="text-[9px] text-gray-600 font-mono">Mission Critical Headers</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-6">
+                                            <span className="text-4xl font-bold text-white w-12 text-center">Aa</span>
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] text-white font-bold uppercase">700 Bold</span>
+                                                <span className="text-[9px] text-gray-600 font-mono">Module Sub-headings</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-6">
+                                            <span className="text-4xl font-semibold text-white w-12 text-center">Aa</span>
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] text-white font-semibold uppercase">600 SemiBold</span>
+                                                <span className="text-[9px] text-gray-600 font-mono">Interactive Components</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-6">
+                                            <span className="text-4xl font-normal text-white w-12 text-center">Aa</span>
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] text-white font-normal uppercase">400 Regular</span>
+                                                <span className="text-[9px] text-gray-600 font-mono">Standard Interface Text</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <span className="text-[8px] font-mono text-gray-600 uppercase font-black block mb-6 tracking-widest">Character_Set</span>
+                                    <p className="text-sm font-mono text-gray-500 break-all leading-loose tracking-tighter">
+                                        ABCDEFGHIJKLMNOPQRSTUVWXYZ <br/>
+                                        abcdefghijklmnopqrstuvwxyz <br/>
+                                        0123456789 (!@#$%^&*?)
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </Card>
-                    <Card className="p-10 bg-[#080808] border-white/10 font-mono relative overflow-hidden">
-                         <div className="absolute top-0 right-0 p-4 opacity-[0.02] scale-[4] rotate-12 pointer-events-none font-black text-white">MONO</div>
-                        <span className="text-[8px] font-mono text-gray-600 uppercase font-black block mb-6 tracking-[0.2em]">Secondary_Mono: JetBrains Mono / Bold</span>
-                        <div className="space-y-6">
-                            <p className="text-4xl font-bold text-blue-400 tracking-tighter leading-none">0123456789 <br/> !@#$%^&*()</p>
-                            <p className="text-xl text-gray-400 tracking-tight bg-white/5 p-3 rounded-sm">CONST_CORE_SIGNAL = 0x7B3FE4;</p>
-                            <div className="pt-4 flex gap-4">
-                                <div className="text-[10px] font-mono text-gray-600 uppercase font-black">Ligatures: ON</div>
-                                <div className="text-[10px] font-mono text-gray-600 uppercase font-black">Style: Fixed</div>
+
+                    {/* JetBrains Mono Specimen */}
+                    <Card className="p-0 bg-[#080808] border-white/10 font-mono overflow-hidden relative group">
+                        <div className="absolute top-0 right-0 p-8 opacity-[0.02] scale-[5] rotate-12 pointer-events-none font-black text-white">MONO</div>
+                        
+                        <div className="p-6 border-b border-white/5 bg-[#0A0A0A] flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <div className="p-1.5 bg-purple-500/10 rounded-sm border border-purple-500/20">
+                                    <CodeIcon className="w-4 h-4 text-purple-400" />
+                                </div>
+                                <div>
+                                    <h3 className="text-[10px] font-black text-white uppercase tracking-widest leading-none">Secondary_Mono</h3>
+                                    <span className="text-[8px] font-mono text-gray-500 uppercase tracking-widest">JetBrains Mono / Open-Source / Ligatures-Enabled</span>
+                                </div>
+                            </div>
+                            <span className="text-[8px] font-mono text-gray-600 uppercase tracking-widest">Usage: Telemetry / Bytecode / Logs</span>
+                        </div>
+
+                        <div className="p-10 lg:p-16 grid grid-cols-1 lg:grid-cols-12 gap-16 relative z-10">
+                            <div className="lg:col-span-7 space-y-12">
+                                <div className="space-y-4">
+                                    <span className="text-[8px] font-mono text-purple-500 uppercase font-bold tracking-[0.3em]">Code_Block_Display</span>
+                                    <div className="bg-black/60 border border-white/5 p-8 rounded-sm font-mono text-sm leading-relaxed text-blue-300">
+                                        <p><span className="text-purple-400">async function</span> <span className="text-white">authorize</span>(node: <span className="text-yellow-400">Address</span>) &#123;</p>
+                                        <p className="pl-6 text-gray-600 italic">// Verify cryptographic handshake integrity</p>
+                                        <p className="pl-6"><span className="text-purple-400">const</span> status = <span className="text-purple-400">await</span> kernel.<span className="text-white">scan</span>(node);</p>
+                                        <p className="pl-6"><span className="text-purple-400">return</span> status.integrity === <span className="text-green-400">1.0</span>;</p>
+                                        <p>&#125;</p>
+                                    </div>
+                                </div>
+                                <div className="space-y-4">
+                                    <span className="text-[8px] font-mono text-purple-500 uppercase font-bold tracking-[0.3em]">Telemetry_Stream</span>
+                                    <div className="bg-[#050505] p-6 border-l-2 border-purple-500 space-y-1">
+                                        <div className="flex gap-4 text-[10px] text-gray-500">
+                                            <span className="w-16">14:02:11</span>
+                                            <span className="text-blue-400">[SIGNAL]</span>
+                                            <span className="text-white">0x7B3FE4...INIT_SYNC_SUCCESS</span>
+                                        </div>
+                                        <div className="flex gap-4 text-[10px] text-gray-500">
+                                            <span className="w-16">14:02:12</span>
+                                            <span className="text-purple-400">[KERNEL]</span>
+                                            <span className="text-white">SCANNING_MEMPOOL_VECTORS_V4</span>
+                                        </div>
+                                        <div className="flex gap-4 text-[10px] text-gray-500">
+                                            <span className="w-16">14:02:14</span>
+                                            <span className="text-red-500">[WARN]</span>
+                                            <span className="text-white">HIGH_LATENCY_DETECTED_NODE_S1</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="lg:col-span-5 border-l border-white/5 pl-12 space-y-12">
+                                <div>
+                                    <span className="text-[8px] font-mono text-gray-600 uppercase font-black block mb-6 tracking-widest">Symbol_Library</span>
+                                    <div className="grid grid-cols-4 gap-4">
+                                        {['=>', '!=', '===', '<=', '&&', '||', '=>', '::'].map((sym, i) => (
+                                            <div key={i} className="bg-white/5 p-3 flex items-center justify-center rounded-sm">
+                                                <span className="text-xl text-white font-bold">{sym}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <p className="text-[8px] text-gray-600 font-mono mt-4 uppercase">Ligature visual verification enabled.</p>
+                                </div>
+
+                                <div>
+                                    <span className="text-[8px] font-mono text-gray-600 uppercase font-black block mb-6 tracking-widest">Character_Reference</span>
+                                    <p className="text-sm font-mono text-gray-400 break-all leading-loose">
+                                        0 1 2 3 4 5 6 7 8 9 <br/>
+                                        ! @ # $ % ^ &amp; * ( ) <br/>
+                                        {"[ ] { } < > / \\ | : ;"}
+                                    </p>
+                                    <div className="mt-8 space-y-2">
+                                        <div className="flex justify-between items-center py-2 border-b border-white/5">
+                                            <span className="text-[9px] text-gray-600 uppercase">Weight: Regular</span>
+                                            <span className="text-[11px] text-white">Mono_400</span>
+                                        </div>
+                                        <div className="flex justify-between items-center py-2 border-b border-white/5">
+                                            <span className="text-[9px] text-gray-600 uppercase">Weight: Bold</span>
+                                            <span className="text-[11px] text-white font-bold">Mono_700</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </Card>

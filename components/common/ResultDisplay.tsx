@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 interface ResultDisplayProps {
   content: string | null;
@@ -23,7 +23,7 @@ const simpleMarkdownParser = (text: string): string => {
       }
 
       return part
-          // 2. Enhanced Callouts (Notion Style)
+          // 2. Enhanced Callouts
           .replace(/^&gt; \[!(INFO|WARNING|CRITICAL|SUCCESS)\]\n([\s\S]*?)$/gim, (match, type, content) => {
               const styles = {
                   INFO: 'bg-blue-500/5 border-blue-500/20 text-blue-400',
@@ -80,26 +80,26 @@ const simpleMarkdownParser = (text: string): string => {
 };
 
 const ResultDisplay: React.FC<ResultDisplayProps> = ({ content }) => {
+  // Memoize the HTML content to avoid unnecessary parsing on every render
+  const htmlContent = useMemo(() => simpleMarkdownParser(content || ""), [content]);
+
   if (!content) return null;
-  const htmlContent = simpleMarkdownParser(content);
+
   return (
     <div className="bg-transparent border-none p-0 relative overflow-visible group">
       <div className="relative">
-          {/* Subtle noise for texture */}
           <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5 pointer-events-none"></div>
           <div
-            className="prose prose-invert max-w-none relative z-10"
+            className="prose prose-invert max-w-none relative z-10 transition-opacity duration-300"
             dangerouslySetInnerHTML={{ __html: htmlContent }}
           />
       </div>
       
-      {/* Article Status Line */}
-      <div className="mt-24 pt-6 border-t border-white/10 flex justify-between items-center text-[9px] font-mono text-gray-600 uppercase font-black tracking-widest">
+      <div className="mt-20 pt-6 border-t border-white/10 flex justify-between items-center text-[9px] font-mono text-gray-600 uppercase font-black tracking-widest">
           <div className="flex items-center gap-6">
             <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div> END_OF_SPECIFICATION</span>
-            <span className="opacity-40">// PKT_SIZE: {Math.floor(htmlContent.length / 1024)}KB</span>
           </div>
-          <span>SIG: {Math.random().toString(36).substr(2, 12).toUpperCase()}</span>
+          <span>SIG: {Math.random().toString(36).substr(2, 10).toUpperCase()}</span>
       </div>
     </div>
   );

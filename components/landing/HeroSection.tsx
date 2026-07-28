@@ -32,56 +32,56 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onStart }) => {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.8, ease: "easeOut" }}
                     >
-                        {/* Status Badge - Moved lower with mt-20 */}
-                        <div className="inline-flex items-center gap-2.5 px-3 py-1 border border-white/5 bg-black/40 backdrop-blur-xl mt-20 mb-10 mx-auto lg:mx-0 rounded-full">
+                        {/* Status Badge */}
+                        <div className="inline-flex items-center gap-2.5 px-3 py-1 border border-white/5 bg-black/40 backdrop-blur-xl mt-12 mb-10 mx-auto lg:mx-0 rounded-full">
                             <div className="flex gap-1.5 items-center">
-                                <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse shadow-[0_0_6px_rgba(34,197,94,0.8)]"></div>
+                                <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse"></div>
                                 <span className="text-[7px] font-mono text-gray-400 tracking-[0.4em] uppercase font-black opacity-80">
                                     CORE_UPLINK: ACTIVE // AGG_LAYER_V1
                                 </span>
                             </div>
                         </div>
 
-                        <div className="mb-8 min-h-[140px] md:min-h-[180px] lg:min-h-[160px]">
+                        <div className="mb-8 min-h-[120px] md:min-h-[160px] lg:min-h-[140px]">
                             <HeroTypography 
                                 text="Sovereign Defense for Institutional Assets." 
                                 highlightWords={['Defense', 'Institutional']}
-                                className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl xl:text-8xl font-black uppercase tracking-tighter leading-[0.9] text-white"
+                                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black uppercase tracking-tighter leading-[0.9] text-white"
                             />
                         </div>
                         
-                        <p className="text-base md:text-lg text-gray-400 mb-12 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-light border-l-2 border-polygon-purple/50 pl-8 py-2">
-                            Deploying <span className="text-white font-medium">algorithmic auditing</span>, <span className="text-white font-medium">pre-execution shielding</span>, and <span className="text-white font-medium">tactical reconnaissance</span> to secure the next generation of Polygon infrastructure.
+                        <p className="text-sm md:text-base text-gray-400 mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed font-light border-l-2 border-polygon-purple/50 pl-8 py-2">
+                            Deploying <span className="text-white font-medium">algorithmic auditing</span>, <span className="text-white font-medium">pre-execution shielding</span>, and <span className="text-white font-medium">tactical reconnaissance</span> to secure Polygon infrastructure.
                         </p>
                         
-                        <div className="flex flex-wrap justify-center lg:justify-start gap-5">
+                        <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
                             <Button 
                                 onClick={onStart}
-                                className="min-w-[220px] py-4 text-[12px] !bg-white !text-black hover:!bg-polygon-purple hover:!text-white hover:!scale-105 transition-all shadow-[0_10px_40px_rgba(255,255,255,0.1)] rounded-none"
+                                className="min-w-[180px] py-3 text-[11px] !bg-white !text-black hover:!bg-polygon-purple hover:!text-white hover:!scale-105 transition-all shadow-[0_5px_20px_rgba(255,255,255,0.05)] rounded-none"
                             >
                                 INITIALIZE_UPLINK
                             </Button>
                             <Button 
                                 variant="secondary" 
                                 onClick={() => navigateTo('documentation')}
-                                className="min-w-[220px] py-4 text-[12px] hover:!bg-white/5 hover:!border-polygon-purple transition-all font-mono rounded-none"
+                                className="min-w-[180px] py-3 text-[11px] hover:!bg-white/5 hover:!border-polygon-purple transition-all font-mono rounded-none"
                             >
-                                VIEW_SPECIFICATIONS
+                                VIEW_SPECS
                             </Button>
                         </div>
 
-                        <div className="mt-16 lg:mt-24 grid grid-cols-3 max-w-lg mx-auto lg:mx-0 gap-8 border-t border-white/10 pt-10">
+                        <div className="mt-12 lg:mt-20 grid grid-cols-3 max-w-md mx-auto lg:mx-0 gap-6 border-t border-white/10 pt-8">
                             {[
-                                { label: 'Audit Latency', val: '0.4s', sub: 'GEMINI_V3_CORE' },
-                                { label: 'Node Health', val: '99.9%', sub: 'REAL_TIME_PULSE' },
-                                { label: 'Defense Score', val: '98/100', sub: 'CERTIFIED_TRUST' },
+                                { label: 'Latency', val: '0.4s', sub: 'GEMINI_V3' },
+                                { label: 'Uptime', val: '99.9%', sub: 'LIVE_PULSE' },
+                                { label: 'Trust', val: '98/100', sub: 'CERTIFIED' },
                             ].map((stat, i) => (
                                 <div key={i} className="flex flex-col">
-                                    <span className="text-[9px] text-gray-500 font-mono uppercase tracking-[0.2em] mb-1 font-bold">{stat.label}</span>
-                                    <div className="flex items-baseline gap-1.5">
-                                        <span className="text-2xl text-white font-mono font-bold tracking-tight">{stat.val}</span>
+                                    <span className="text-[8px] text-gray-500 font-mono uppercase tracking-[0.1em] mb-1 font-bold">{stat.label}</span>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-xl text-white font-mono font-bold tracking-tight">{stat.val}</span>
                                     </div>
-                                    <span className="text-[8px] text-polygon-purple/80 font-mono font-bold tracking-widest">{stat.sub}</span>
+                                    <span className="text-[7px] text-polygon-purple/80 font-mono font-bold tracking-widest">{stat.sub}</span>
                                 </div>
                             ))}
                         </div>
@@ -97,15 +97,15 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onStart }) => {
                         transition={{ duration: 1.2, delay: 0.3, type: "spring" }}
                         className="w-full max-w-lg lg:max-w-none relative"
                     >
-                        <div className="absolute -top-10 -right-10 w-32 h-32 border-t-2 border-r-2 border-polygon-purple/20 pointer-events-none hidden xl:block"></div>
-                        <div className="absolute -bottom-10 -left-10 w-32 h-32 border-b-2 border-l-2 border-polygon-purple/20 pointer-events-none hidden xl:block"></div>
+                        <div className="absolute -top-10 -right-10 w-24 h-24 border-t-2 border-r-2 border-polygon-purple/20 pointer-events-none hidden xl:block"></div>
+                        <div className="absolute -bottom-10 -left-10 w-24 h-24 border-b-2 border-l-2 border-polygon-purple/20 pointer-events-none hidden xl:block"></div>
                         
                         <div className="relative z-10 group">
-                             <div className="absolute -top-6 -left-6 z-20 bg-polygon-purple/20 border border-polygon-purple/40 px-3 py-1.5 text-[10px] font-mono text-white uppercase tracking-widest hidden md:block backdrop-blur-md shadow-2xl">
-                                <span className="animate-ping mr-2 inline-block w-1.5 h-1.5 bg-white rounded-full"></span> AGGLAYER_FEED
+                            <div className="absolute -top-4 -left-4 z-20 bg-polygon-purple/20 border border-polygon-purple/40 px-2 py-1 text-[8px] font-mono text-white uppercase tracking-widest hidden md:block backdrop-blur-md">
+                                <span className="animate-ping mr-2 inline-block w-1 h-1 bg-white rounded-full"></span> AGGLAYER_FEED
                             </div>
                             
-                            <div className="transform-gpu transition-transform duration-700 hover:rotate-y-1 hover:rotate-x-1">
+                            <div className="transform-gpu transition-transform duration-700 hover:rotate-y-1">
                                 <TerminalWidget />
                             </div>
                         </div>
@@ -113,9 +113,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onStart }) => {
                 </div>
             </div>
 
-            <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 opacity-30 group hidden lg:flex cursor-pointer hover:opacity-100 transition-opacity">
-                <span className="text-[10px] font-mono uppercase tracking-[0.4em] text-gray-500 group-hover:text-polygon-purple transition-colors">INIT_RECONNAISSANCE</span>
-                <div className="w-px h-12 bg-gradient-to-b from-polygon-purple/60 to-transparent"></div>
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-20 group hidden lg:flex cursor-pointer hover:opacity-100 transition-opacity">
+                <span className="text-[8px] font-mono uppercase tracking-[0.3em] text-gray-500">RECONNAISSANCE</span>
+                <div className="w-px h-10 bg-gradient-to-b from-polygon-purple/60 to-transparent"></div>
             </div>
         </header>
     );

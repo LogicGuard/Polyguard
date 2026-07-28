@@ -7,8 +7,6 @@ import {
     IntelligenceBriefingResult
 } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 // --- Advanced Caching System ---
 const apiCache = new Map<string, { timestamp: number, data: any }>();
 const pendingRequests = new Map<string, Promise<any>>();
@@ -41,39 +39,71 @@ function setCache(key: string, data: any) {
 }
 
 const TTL = {
-    SHORT: 10 * 60 * 1000,
+    SHORT: 5 * 60 * 1000,
     MEDIUM: 30 * 60 * 1000,
     LONG: 120 * 60 * 1000
 };
 
-// --- Request Orchestration & Cooldown Notification ---
+// --- Intelligent Request Orchestration ---
 let isGlobalCoolingDown = false;
 let cooldownTimer: any = null;
 
-// Event target for UI to listen to system status changes
 export const systemStatusEvents = new EventTarget();
 
 const setCoolingDown = (value: boolean) => {
+    if (isGlobalCoolingDown === value) return;
     isGlobalCoolingDown = value;
     systemStatusEvents.dispatchEvent(new CustomEvent('statusChange', { detail: { isCoolingDown: value } }));
 };
 
 export const getSystemStatus = () => ({ isCoolingDown: isGlobalCoolingDown });
 
-class RequestQueue {
-    private queue: Array<() => Promise<any>> = [];
-    private processing = false;
+interface QueueItem {
+    fn: () => Promise<any>;
+    priority: number; // Higher is more urgent
+    id: string;
+    model: string;
+}
 
-    async add<T>(fn: () => Promise<T>): Promise<T> {
+class RequestOrchestrator {
+    private queue: QueueItem[] = [];
+    private processing = false;
+    private lastRequestTimes: Record<string, number> = {
+        'pro': 0,
+        'flash': 0
+    };
+    
+    // Limits based on Gemini Free Tier:
+    // Pro: 2 RPM (30s delay)
+    // Flash: 15 RPM (4s delay)
+    private readonly DELAYS: Record<string, number> = {
+        'pro': 32000, 
+        'flash': 4500
+    };
+
+    async add<T>(fn: () => Promise<T>, priority: number = 1, id: string = 'generic', model: string = 'pro'): Promise<T> {
+        const modelType = model.includes('pro') ? 'pro' : 'flash';
+
+        if (priority === 0 && this.queue.some(item => item.id === id)) {
+            console.debug(`[Orchestrator] De-duplicating background task: ${id}`);
+            return Promise.reject(new Error("DUPLICATE_BACKGROUND_TASK"));
+        }
+
         return new Promise((resolve, reject) => {
-            this.queue.push(async () => {
-                try {
-                    const result = await fn();
-                    resolve(result);
-                } catch (err) {
-                    reject(err);
-                }
+            this.queue.push({ 
+                fn: async () => {
+                    try {
+                        const result = await fn();
+                        resolve(result);
+                    } catch (err) {
+                        reject(err);
+                    }
+                }, 
+                priority,
+                id,
+                model: modelType
             });
+            this.queue.sort((a, b) => b.priority - a.priority);
             this.process();
         });
     }
@@ -82,82 +112,88 @@ class RequestQueue {
         if (this.processing || this.queue.length === 0) return;
         this.processing = true;
 
-        while (this.queue.length > 0) {
-            const task = this.queue.shift();
-            if (task) {
-                await task();
-                // Add a mandatory delay between ANY non-streaming requests to avoid burst 429s.
-                // 4100ms respects the ~15 RPM limit of Gemini Pro.
-                await new Promise(res => setTimeout(res, 4100)); 
+        try {
+            while (this.queue.length > 0) {
+                if (isGlobalCoolingDown) {
+                    break;
+                }
+
+                const task = this.queue[0];
+                const modelType = task.model;
+                const now = Date.now();
+                const timeSinceLast = now - (this.lastRequestTimes[modelType] || 0);
+                const requiredDelay = this.DELAYS[modelType];
+
+                if (timeSinceLast < requiredDelay) {
+                    // Re-evaluate queue in a few seconds or wait
+                    const waitTime = requiredDelay - timeSinceLast;
+                    await new Promise(res => setTimeout(res, Math.min(waitTime, 2000)));
+                    continue; 
+                }
+
+                this.queue.shift(); // Remove task from queue as we are about to execute it
+                this.lastRequestTimes[modelType] = Date.now();
+                await task.fn();
             }
+        } finally {
+            this.processing = false;
         }
-        this.processing = false;
     }
 }
 
-const globalQueue = new RequestQueue();
+const orchestrator = new RequestOrchestrator();
 
 const handleGeminiError = (error: any): { data: null; error: string } => {
-    console.error("Gemini API Error Detail:", error);
-    let errorMessage = "An unexpected error occurred.";
-
     const errorStr = JSON.stringify(error).toLowerCase();
-    const isRateLimit = errorStr.includes('429') || errorStr.includes('quota') || errorStr.includes('resource_exhausted') || errorStr.includes('limit');
-
+    const isRateLimit = errorStr.includes('429') || errorStr.includes('quota') || errorStr.includes('resource_exhausted');
+    
     if (isRateLimit) {
-        errorMessage = "QUOTA_EXHAUSTED: AI limits reached. System entering recovery phase.";
         setCoolingDown(true);
         clearTimeout(cooldownTimer);
-        cooldownTimer = setTimeout(() => { setCoolingDown(false); }, 60000);
-    } else if (errorStr.includes('500') || errorStr.includes('unavailable')) {
-        errorMessage = "UPSTREAM_ERROR: AI service temporarily unavailable.";
+        // Quota window reset - usually 1 minute, we wait 65s to be safe
+        cooldownTimer = setTimeout(() => { 
+            setCoolingDown(false);
+        }, 65000); 
+        return { data: null, error: "QUOTA_EXHAUSTED: Security kernel recalibrating. Normal operations resume in 60s." };
+    }
+
+    const isTransient = errorStr.includes('500') || errorStr.includes('xhr error') || errorStr.includes('rpc failed') || errorStr.includes('timeout');
+    if (isTransient) {
+        return { data: null, error: "SIGNAL_INTERFERENCE: Re-establishing network link..." };
     }
     
-    return { data: null, error: errorMessage };
+    return { data: null, error: "AI Service temporarily restricted." };
 }
 
-async function generateContentWithRetry(model: string, contents: any, config?: any): Promise<GenerateContentResponse> {
-    if (isGlobalCoolingDown) {
-        throw new Error("SYSTEM_CONGESTION: Cooling down to respect API limits.");
+async function generateContentWithRetry(model: string, contents: any, config?: any, priority: number = 1, taskId: string = 'gen'): Promise<GenerateContentResponse> {
+    if (isGlobalCoolingDown && priority === 0) {
+        throw new Error("SYSTEM_CONGESTION");
     }
 
-    return globalQueue.add(async () => {
-        const maxRetries = 2; 
-        let attempt = 0;
-        
-        while (attempt < maxRetries) {
-            try {
-                return await ai.models.generateContent({ model, contents, config });
-            } catch (error: any) {
-                attempt++;
-                const errorStr = JSON.stringify(error).toLowerCase();
-                const is429 = errorStr.includes('429') || errorStr.includes('quota') || errorStr.includes('resource_exhausted') || errorStr.includes('limit');
-                
-                if (is429) {
-                    setCoolingDown(true);
-                    clearTimeout(cooldownTimer);
-                    cooldownTimer = setTimeout(() => { setCoolingDown(false); }, 60000);
-                }
-
-                if (attempt < maxRetries && (is429 || errorStr.includes('500'))) {
-                    const delay = Math.pow(attempt + 1, 2) * 3000; 
-                    await new Promise(res => setTimeout(res, delay));
-                } else {
-                    throw error;
-                }
+    return orchestrator.add(async () => {
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        try {
+            return await ai.models.generateContent({ model, contents, config });
+        } catch (error: any) {
+            const errorStr = JSON.stringify(error).toLowerCase();
+            const is429 = errorStr.includes('429') || errorStr.includes('quota') || errorStr.includes('resource_exhausted');
+            
+            if (is429) {
+                setCoolingDown(true);
+                clearTimeout(cooldownTimer);
+                cooldownTimer = setTimeout(() => setCoolingDown(false), 65000);
             }
+            throw error;
         }
-        throw new Error("EXHAUSTED_RETRIES");
-    });
+    }, priority, taskId, model);
 }
 
-export async function analyzeWithGemini(prompt: string): Promise<{ data: string | null; error: string | null }> {
+export async function analyzeWithGemini(prompt: string, isBackground: boolean = false): Promise<{ data: string | null; error: string | null }> {
     const cacheKey = `text_${btoa(prompt).substring(0, 32)}`;
     
     if (pendingRequests.has(cacheKey)) {
         try {
-            const data = await pendingRequests.get(cacheKey);
-            return { data, error: null };
+            return { data: await pendingRequests.get(cacheKey), error: null };
         } catch (e) {
             return handleGeminiError(e);
         }
@@ -168,8 +204,14 @@ export async function analyzeWithGemini(prompt: string): Promise<{ data: string 
         if (cached) return { data: cached, error: null };
 
         const requestPromise = (async () => {
-            const model = 'gemini-3-pro-preview';
-            const response = await generateContentWithRetry(model, prompt);
+            const model = isBackground ? 'gemini-3-flash-preview' : 'gemini-3-pro-preview';
+            const response = await generateContentWithRetry(
+                model, 
+                prompt, 
+                undefined, 
+                isBackground ? 0 : 1, 
+                `text_${cacheKey}`
+            );
             const text = response.text || "";
             if (text) setCache(cacheKey, text);
             return text;
@@ -185,13 +227,12 @@ export async function analyzeWithGemini(prompt: string): Promise<{ data: string 
     }
 }
 
-async function analyzeWithStructuredSchema<T>(prompt: string, schema: any, cacheKey?: string, ttl: number = TTL.SHORT): Promise<{ data: T | null; error: string | null }> {
+async function analyzeWithStructuredSchema<T>(prompt: string, schema: any, cacheKey?: string, ttl: number = TTL.SHORT, isBackground: boolean = false): Promise<{ data: T | null; error: string | null }> {
     const internalCacheKey = cacheKey || `struct_${btoa(prompt).substring(0, 32)}`;
 
     if (pendingRequests.has(internalCacheKey)) {
         try {
-            const data = await pendingRequests.get(internalCacheKey);
-            return { data, error: null };
+            return { data: await pendingRequests.get(internalCacheKey), error: null };
         } catch (e) {
             return handleGeminiError(e);
         }
@@ -202,11 +243,17 @@ async function analyzeWithStructuredSchema<T>(prompt: string, schema: any, cache
         if (cached) return { data: cached, error: null };
 
         const requestPromise = (async () => {
-            const model = 'gemini-3-pro-preview';
-            const response = await generateContentWithRetry(model, prompt, {
-                responseMimeType: "application/json",
-                responseSchema: schema,
-            });
+            const model = isBackground ? 'gemini-3-flash-preview' : 'gemini-3-pro-preview';
+            const response = await generateContentWithRetry(
+                model, 
+                prompt, 
+                {
+                    responseMimeType: "application/json",
+                    responseSchema: schema,
+                }, 
+                isBackground ? 0 : 2,
+                internalCacheKey
+            );
             
             const jsonText = response.text?.trim() || "";
             if (!jsonText) throw new Error("EMPTY_RESPONSE");
@@ -226,8 +273,8 @@ async function analyzeWithStructuredSchema<T>(prompt: string, schema: any, cache
     }
 }
 
-// Live API Session helper
 export const connectToLiveAssistant = (callbacks: any) => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   return ai.live.connect({
     model: 'gemini-2.5-flash-native-audio-preview-12-2025',
     callbacks,
@@ -236,13 +283,14 @@ export const connectToLiveAssistant = (callbacks: any) => {
       speechConfig: {
         voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } },
       },
-      systemInstruction: 'You are PolyGuard Specialist, a highly technical crypto security AI. You assist users with real-time analysis of Polygon network threats, wallet security, and smart contract audits. Be concise, technical, and alert.',
+      systemInstruction: 'You are PolyGuard Specialist, a highly technical crypto security AI. Concisely analyze Polygon network threats. Yielding priority to mission critical data streams.',
       inputAudioTranscription: {},
       outputAudioTranscription: {},
     },
   });
 };
 
+// BACKGROUND TASKS - ALL MOVED TO FLASH MODEL
 export async function getTokenApprovals(address: string): Promise<{ data: TokenApproval[] | null; error: string | null }> {
     const prompt = `Identify active token approvals for Polygon wallet: ${address}. JSON list.`;
     const schema = {
@@ -260,7 +308,7 @@ export async function getTokenApprovals(address: string): Promise<{ data: TokenA
             required: ['tokenName', 'tokenSymbol', 'tokenAddress', 'spenderName', 'spenderAddress', 'allowance']
         }
     };
-    return analyzeWithStructuredSchema<TokenApproval[]>(prompt, schema, `approvals_${address}`, TTL.SHORT);
+    return analyzeWithStructuredSchema<TokenApproval[]>(prompt, schema, `approvals_${address}`, TTL.SHORT, true);
 }
 
 export async function getPortfolioSnapshot(address: string): Promise<{ data: PortfolioSnapshot | null; error: string | null }> {
@@ -270,17 +318,18 @@ export async function getPortfolioSnapshot(address: string): Promise<{ data: Por
         properties: { securityScore: { type: Type.NUMBER }, riskLevel: { type: Type.STRING } },
         required: ['securityScore', 'riskLevel']
     };
-    return analyzeWithStructuredSchema<PortfolioSnapshot>(prompt, schema, `snapshot_${address}`, TTL.MEDIUM);
+    return analyzeWithStructuredSchema<PortfolioSnapshot>(prompt, schema, `snapshot_${address}`, TTL.MEDIUM, true);
 }
 
 export async function getIntelligenceBriefing(): Promise<{ data: GenerateContentResponse | null; error: string | null }> {
+    if (isGlobalCoolingDown) return { data: null, error: "SYSTEM_CONGESTION" };
     try {
         const response = await generateContentWithRetry(
-            "gemini-3-pro-preview",
-            "Provide a high-level technical intelligence briefing for the Polygon network. Include recent security threats and DeFi sentiment from the last 24 hours.",
-            {
-                tools: [{ googleSearch: {} }],
-            }
+            "gemini-3-flash-preview",
+            "Polygon network security status briefing. Last 24 hours.",
+            { tools: [{ googleSearch: {} }] },
+            0,
+            'intel_briefing'
         );
         return { data: response, error: null };
     } catch (error) {
@@ -289,7 +338,7 @@ export async function getIntelligenceBriefing(): Promise<{ data: GenerateContent
 }
 
 export async function getSecurityAlerts(): Promise<{ data: SecurityAlert[] | null; error: string | null }> {
-    const prompt = `2 new security alerts for Polygon.`;
+    const prompt = `Generate 2 new plausible security alerts for Polygon network. JSON format.`;
     const schema = {
         type: Type.ARRAY,
         items: {
@@ -304,11 +353,11 @@ export async function getSecurityAlerts(): Promise<{ data: SecurityAlert[] | nul
             required: ['id', 'timestamp', 'severity', 'title', 'description']
         }
     };
-    return analyzeWithStructuredSchema<SecurityAlert[]>(prompt, schema, 'security_alerts', TTL.MEDIUM);
+    return analyzeWithStructuredSchema<SecurityAlert[]>(prompt, schema, 'security_alerts', TTL.MEDIUM, true);
 }
 
 export async function getOnChainEvents(): Promise<{ data: OnChainEvent[] | null; error: string | null }> {
-    const prompt = `2 recent on-chain events for Polygon.`;
+    const prompt = `Generate 2 recent plausible on-chain events for Polygon. JSON format.`;
     const schema = {
         type: Type.ARRAY,
         items: {
@@ -323,11 +372,12 @@ export async function getOnChainEvents(): Promise<{ data: OnChainEvent[] | null;
             required: ['id', 'timestamp', 'type', 'details', 'address']
         }
     };
-    return analyzeWithStructuredSchema<OnChainEvent[]>(prompt, schema, 'onchain_events', TTL.MEDIUM);
+    return analyzeWithStructuredSchema<OnChainEvent[]>(prompt, schema, 'onchain_events', TTL.MEDIUM, true);
 }
 
+// COMPLEX TASKS - KEPT ON PRO MODEL
 export async function analyzeWalletReport(address: string): Promise<{ data: WalletReportResult | null; error: string | null }> {
-    const prompt = `Analyze wallet ${address} on Polygon.`;
+    const prompt = `Analyze wallet ${address} on Polygon. Provide risk level, security score, summary, and lists of positive points and risks.`;
     const schema = {
         type: Type.OBJECT,
         properties: {
@@ -339,11 +389,11 @@ export async function analyzeWalletReport(address: string): Promise<{ data: Wall
         },
         required: ['riskLevel', 'securityScore', 'summary', 'positivePoints', 'risks']
     };
-    return analyzeWithStructuredSchema<WalletReportResult>(prompt, schema, `wallet_report_${address}`, TTL.MEDIUM);
+    return analyzeWithStructuredSchema<WalletReportResult>(prompt, schema, `wallet_report_${address}`, TTL.MEDIUM, false);
 }
 
 export async function analyzeBridgeSecurity(address: string): Promise<{ data: BridgeSecurityResult | null; error: string | null }> {
-    const prompt = `Analyze bridge security at ${address}.`;
+    const prompt = `Analyze bridge security at ${address}. Evaluate withdrawal safety and liquidity risk.`;
     const schema = {
         type: Type.OBJECT,
         properties: {
@@ -353,11 +403,11 @@ export async function analyzeBridgeSecurity(address: string): Promise<{ data: Br
         },
         required: ['securityScore', 'withdrawalSafety', 'liquidityRisk']
     };
-    return analyzeWithStructuredSchema<BridgeSecurityResult>(prompt, schema);
+    return analyzeWithStructuredSchema<BridgeSecurityResult>(prompt, schema, undefined, TTL.MEDIUM, false);
 }
 
 export async function analyzeRegulatoryCompliance(identifier: string): Promise<{ data: RegulatoryComplianceResult | null; error: string | null }> {
-    const prompt = `Analyze regulatory compliance for ${identifier}.`;
+    const prompt = `Analyze regulatory compliance for ${identifier}. Evaluate AML risk, compliance status, and legal risk score.`;
     const schema = {
         type: Type.OBJECT,
         properties: {
@@ -367,11 +417,11 @@ export async function analyzeRegulatoryCompliance(identifier: string): Promise<{
         },
         required: ['amlRisk', 'complianceStatus', 'legalRisk']
     };
-    return analyzeWithStructuredSchema<RegulatoryComplianceResult>(prompt, schema);
+    return analyzeWithStructuredSchema<RegulatoryComplianceResult>(prompt, schema, undefined, TTL.MEDIUM, false);
 }
 
 export async function analyzeTransactionWithFirewall(targetContract: string, txData: string): Promise<{ data: FirewallAnalysisResult | null; error: string | null }> {
-    const prompt = `Firewall simulation for target ${targetContract} and data ${txData}.`;
+    const prompt = `Pre-execution firewall simulation for target ${targetContract} and data ${txData}. Detect threats and suggest actions.`;
     const schema = {
         type: Type.OBJECT,
         properties: {
@@ -383,11 +433,11 @@ export async function analyzeTransactionWithFirewall(targetContract: string, txD
         },
         required: ['status', 'summary', 'threatType', 'confidence', 'suggestedActions']
     };
-    return analyzeWithStructuredSchema<FirewallAnalysisResult>(prompt, schema);
+    return analyzeWithStructuredSchema<FirewallAnalysisResult>(prompt, schema, undefined, TTL.SHORT, false);
 }
 
 export async function analyzeTransaction(txData: string): Promise<{ data: TransactionAnalysisResult | null; error: string | null }> {
-    const prompt = `Analyze transaction risk for ${txData}.`;
+    const prompt = `Analyze risk for the following transaction data: ${txData}. Provide warnings and flow details.`;
     const schema = {
         type: Type.OBJECT,
         properties: {
@@ -398,11 +448,11 @@ export async function analyzeTransaction(txData: string): Promise<{ data: Transa
         },
         required: ['riskLevel', 'summary', 'warnings', 'transactionFlow']
     };
-    return analyzeWithStructuredSchema<TransactionAnalysisResult>(prompt, schema);
+    return analyzeWithStructuredSchema<TransactionAnalysisResult>(prompt, schema, undefined, TTL.SHORT, false);
 }
 
 export async function analyzeQuantumResistance(address: string): Promise<{ data: QuantumAnalysisResult | null; error: string | null }> {
-    const prompt = `Quantum resistance analysis for ${address}.`;
+    const prompt = `Quantum resistance analysis for ${address}. Identify vulnerable components and PQC recommendations.`;
     const schema = {
         type: Type.OBJECT,
         properties: {
@@ -414,11 +464,11 @@ export async function analyzeQuantumResistance(address: string): Promise<{ data:
         },
         required: ['readinessStatus', 'summary', 'vulnerableComponents', 'pqcRecommendations', 'migrationPath']
     };
-    return analyzeWithStructuredSchema<QuantumAnalysisResult>(prompt, schema);
+    return analyzeWithStructuredSchema<QuantumAnalysisResult>(prompt, schema, undefined, TTL.MEDIUM, false);
 }
 
 export async function simulateZKProofVerification(address: string): Promise<{ data: ZKProofVerificationResult | null; error: string | null }> {
-    const prompt = `ZK Proof simulation for ${address}.`;
+    const prompt = `Simulate ZK Proof verification for address ${address}. Provide claims status and privacy details.`;
     const schema = {
         type: Type.OBJECT,
         properties: {
@@ -429,11 +479,11 @@ export async function simulateZKProofVerification(address: string): Promise<{ da
         },
         required: ['status', 'summary', 'verifiedClaims', 'privacyPreserved']
     };
-    return analyzeWithStructuredSchema<ZKProofVerificationResult>(prompt, schema);
+    return analyzeWithStructuredSchema<ZKProofVerificationResult>(prompt, schema, undefined, TTL.SHORT, false);
 }
 
 export async function getNamesForAddresses(addresses: string[]): Promise<{ data: Record<string, { name: string; symbol: string }> | null; error: string | null }> {
-    const prompt = `Project names and symbols for: ${addresses.join(', ')}.`;
+    const prompt = `Identify project names and symbols for these Polygon addresses: ${addresses.join(', ')}. JSON format.`;
     const schema = {
         type: Type.OBJECT,
         properties: {
@@ -448,11 +498,53 @@ export async function getNamesForAddresses(addresses: string[]): Promise<{ data:
         },
         required: ['results']
     };
-    const result = await analyzeWithStructuredSchema<{ results: any[] }>(prompt, schema, `names_${addresses.join('_')}`, TTL.LONG);
+    const result = await analyzeWithStructuredSchema<{ results: any[] }>(prompt, schema, `names_${addresses.join('_')}`, TTL.LONG, true);
     if (result.data) {
         const mapped: Record<string, { name: string; symbol: string }> = {};
         result.data.results.forEach(item => { mapped[item.address] = { name: item.name, symbol: item.symbol }; });
         return { data: mapped, error: null };
     }
     return { data: null, error: result.error };
+}
+
+export async function analyzeSmartContractAudit(code: string): Promise<{ data: SmartContractAuditResult | null; error: string | null }> {
+    const prompt = `Perform an expert smart contract audit on the following Solidity code. Identify security vulnerabilities with severity and gas optimization opportunities.
+    
+    Code:
+    ${code}
+    `;
+    const schema = {
+        type: Type.OBJECT,
+        properties: {
+            summary: { type: Type.STRING },
+            riskLevel: { type: Type.STRING },
+            securityScore: { type: Type.NUMBER },
+            vulnerabilities: {
+                type: Type.ARRAY,
+                items: {
+                    type: Type.OBJECT,
+                    properties: {
+                        title: { type: Type.STRING },
+                        description: { type: Type.STRING },
+                        severity: { type: Type.STRING }
+                    },
+                    required: ['title', 'description', 'severity']
+                }
+            },
+            gasOptimizations: {
+                type: Type.ARRAY,
+                items: {
+                    type: Type.OBJECT,
+                    properties: {
+                        suggestion: { type: Type.STRING },
+                        details: { type: Type.STRING },
+                        estimatedSaving: { type: Type.STRING }
+                    },
+                    required: ['suggestion', 'details', 'estimatedSaving']
+                }
+            }
+        },
+        required: ['summary', 'riskLevel', 'securityScore', 'vulnerabilities', 'gasOptimizations']
+    };
+    return analyzeWithStructuredSchema<SmartContractAuditResult>(prompt, schema, undefined, TTL.MEDIUM, false);
 }

@@ -51,9 +51,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp }) => {
             {/* Global Overlays */}
             <div className="grain-overlay"></div>
             
-            {/* Scroll Progress */}
+            {/* Refined Scroll Progress Bar - Highest Z-Index and Brand Colors */}
             <motion.div
-                className="fixed top-0 left-0 right-0 h-[2px] bg-blue-500 origin-left z-[1000]"
+                className="fixed top-0 left-0 right-0 h-[3px] bg-polygon-purple origin-left z-[2000] shadow-[0_0_15px_rgba(123,63,228,0.8)]"
                 style={{ scaleX }}
             />
 
@@ -75,7 +75,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp }) => {
                   onOpenAuth={openAuth} 
                   onOpenContact={() => setIsContactOpen(true)} 
               />
-              <div className="h-16 md:h-20"></div> {/* Reduced spacer for compact ticker */}
+              <div className="h-16 md:h-24"></div> 
               <SecurityTicker />
             </div>
 

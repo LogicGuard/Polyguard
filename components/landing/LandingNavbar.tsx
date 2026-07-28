@@ -6,7 +6,7 @@ import Button from '../common/Button';
 import { 
     ChevronDownIcon, AuditorIcon, FirewallIcon, 
     WalletIcon, MenuIcon, XIcon, ActivityIcon, 
-    GlobeIcon, ShieldCheckIcon, ZapIcon
+    GlobeIcon, ShieldCheckIcon, ZapIcon, StarIcon
 } from '../Icons';
 import { useNavigation } from '../../context/NavigationContext';
 
@@ -81,17 +81,17 @@ const LandingNavbar: React.FC<LandingNavbarProps> = ({ onOpenAuth, onOpenContact
                 {/* 1. BRANDING & CORE LINKS */}
                 <div className="flex items-center gap-12">
                     <div onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="cursor-pointer">
-                        <CyberpunkLogo className={`${scrolled ? 'scale-90' : 'scale-100'} transition-transform duration-500 origin-left`} />
+                        <CyberpunkLogo className={`${scrolled ? 'scale-75' : 'scale-90'} transition-transform duration-500 origin-left`} />
                     </div>
                     
-                    <div className="hidden lg:flex items-center gap-10">
+                    <div className="hidden lg:flex items-center gap-8">
                         {/* Mega Menu Trigger */}
                         <div 
                             className="relative h-full flex items-center"
                             onMouseEnter={() => setIsMegaMenuOpen(true)}
                             onMouseLeave={() => setIsMegaMenuOpen(false)}
                         >
-                            <button className="flex items-center gap-2 text-[10px] font-black tracking-[0.3em] text-gray-400 hover:text-white transition-colors uppercase cursor-pointer group py-4">
+                            <button className="flex items-center gap-2 text-[9px] font-black tracking-[0.2em] text-gray-400 hover:text-white transition-colors uppercase cursor-pointer group py-4">
                                 <span className="relative">
                                     Platform
                                     <div className="absolute -bottom-1 left-0 w-0 h-[1px] bg-polygon-purple transition-all group-hover:w-full"></div>
@@ -152,27 +152,28 @@ const LandingNavbar: React.FC<LandingNavbarProps> = ({ onOpenAuth, onOpenContact
                         </div>
 
                         <button 
+                            onClick={() => handleModuleClick('documentation', 'pitch-deck')}
+                            className="text-[9px] font-black tracking-[0.2em] text-gray-400 hover:text-white transition-colors uppercase group relative py-4 flex items-center gap-2"
+                        >
+                            <StarIcon className="w-3 h-3 text-yellow-500/50 group-hover:text-yellow-500 transition-colors" />
+                            Investor_Deck
+                            <div className="absolute -bottom-1 left-0 w-0 h-[1px] bg-polygon-purple transition-all group-hover:w-full"></div>
+                        </button>
+
+                        <button 
                             onClick={() => handleModuleClick('ecosystem-insights', 'node-health')}
-                            className="text-[10px] font-black tracking-[0.3em] text-gray-400 hover:text-white transition-colors uppercase group relative py-4"
+                            className="text-[9px] font-black tracking-[0.2em] text-gray-400 hover:text-white transition-colors uppercase group relative py-4"
                         >
                             Infrastructure
                             <div className="absolute -bottom-1 left-0 w-0 h-[1px] bg-polygon-purple transition-all group-hover:w-full"></div>
                         </button>
                         
                         <button 
-                            onClick={() => handleModuleClick('ecosystem-insights', 'ecosystem-health')}
-                            className="text-[10px] font-black tracking-[0.3em] text-gray-400 hover:text-white transition-colors uppercase group relative py-4"
-                        >
-                            Ecosystem
-                            <div className="absolute -bottom-1 left-0 w-0 h-[1px] bg-polygon-purple transition-all group-hover:w-full"></div>
-                        </button>
-
-                        <button 
                             onClick={() => {
                                 const section = document.getElementById('pricing');
                                 section?.scrollIntoView({ behavior: 'smooth' });
                             }}
-                            className="text-[10px] font-black tracking-[0.3em] text-gray-400 hover:text-white transition-colors uppercase group relative py-4"
+                            className="text-[9px] font-black tracking-[0.2em] text-gray-400 hover:text-white transition-colors uppercase group relative py-4"
                         >
                             Pricing
                             <div className="absolute -bottom-1 left-0 w-0 h-[1px] bg-polygon-purple transition-all group-hover:w-full"></div>
@@ -181,33 +182,33 @@ const LandingNavbar: React.FC<LandingNavbarProps> = ({ onOpenAuth, onOpenContact
                 </div>
 
                 {/* 2. HUD & ACTION BUTTONS */}
-                <div className="flex items-center gap-6 xl:gap-10">
+                <div className="flex items-center gap-6 xl:gap-8">
                     
                     {/* Live Network Pulse (HUD Element) */}
-                    <div className="hidden xl:flex flex-col items-end border-l border-white/10 pl-10 gap-1">
+                    <div className="hidden xl:flex flex-col items-end border-l border-white/10 pl-8 gap-1">
                         <div className="flex items-center gap-2">
-                            <span className="text-[9px] font-mono text-gray-600 font-black uppercase tracking-widest leading-none">POLYGON_MAIN_PULSE</span>
-                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
+                            <span className="text-[8px] font-mono text-gray-600 font-black uppercase tracking-widest leading-none">POLYGON_PULSE</span>
+                            <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse"></div>
                         </div>
-                        <div className="text-[11px] font-mono text-white/50 leading-none">
-                            <span className="text-white">62</span> GWEI <span className="mx-1 text-white/20">//</span> <span className="text-white">12.4s</span> BLK_TIME
+                        <div className="text-[10px] font-mono text-white/50 leading-none">
+                            <span className="text-white">62</span> GWEI
                         </div>
                     </div>
 
-                    <div className="hidden lg:flex items-center gap-6">
+                    <div className="hidden lg:flex items-center gap-4">
                         <button 
                             onClick={() => onOpenAuth('login')}
-                            className="text-[10px] font-black tracking-[0.3em] text-gray-400 hover:text-white transition-colors uppercase px-4"
+                            className="text-[9px] font-black tracking-[0.2em] text-gray-400 hover:text-white transition-colors uppercase px-3"
                         >
                             Log_In
                         </button>
                         <Button 
                             onClick={() => onOpenAuth('signup')}
-                            className="!px-10 py-4 !bg-white !text-black hover:!bg-polygon-purple hover:!text-white border-none rounded-none shadow-[0_0_30px_rgba(255,255,255,0.05)] transition-all font-black uppercase text-[11px] tracking-[0.2em] group relative overflow-hidden"
+                            className="!px-6 py-2.5 !bg-white !text-black hover:!bg-polygon-purple hover:!text-white border-none rounded-none transition-all font-black uppercase text-[10px] tracking-[0.1em] group relative overflow-hidden"
                         >
                             <span className="relative z-10 flex items-center gap-2">
                                 Launch_Core
-                                <ShieldCheckIcon className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+                                <ShieldCheckIcon className="w-3 h-3 group-hover:scale-110 transition-transform" />
                             </span>
                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/5 to-transparent translate-x-[-150%] group-hover:translate-x-[150%] transition-transform duration-1000 ease-in-out"></div>
                         </Button>
@@ -216,14 +217,14 @@ const LandingNavbar: React.FC<LandingNavbarProps> = ({ onOpenAuth, onOpenContact
                     {/* Mobile Menu Trigger */}
                     <button 
                         onClick={() => setIsMobileMenuOpen(true)}
-                        className="lg:hidden p-3 bg-white/5 border border-white/10 hover:border-polygon-purple transition-all rounded-sm"
+                        className="lg:hidden p-2 bg-white/5 border border-white/10 hover:border-polygon-purple transition-all rounded-sm"
                     >
-                        <MenuIcon className="w-6 h-6 text-white" />
+                        <MenuIcon className="w-5 h-5 text-white" />
                     </button>
                 </div>
             </div>
 
-            {/* MOBILE MENU COMMAND CENTER */}
+            {/* MOBILE MENU */}
             <AnimatePresence>
                 {isMobileMenuOpen && (
                     <>
@@ -242,7 +243,7 @@ const LandingNavbar: React.FC<LandingNavbarProps> = ({ onOpenAuth, onOpenContact
                             className="fixed top-0 right-0 h-full w-[85%] max-w-[400px] bg-[#050505] border-l border-white/10 z-[2001] flex flex-col"
                         >
                             <div className="p-8 border-b border-white/5 flex justify-between items-center bg-[#080808]">
-                                <CyberpunkLogo className="scale-90" />
+                                <CyberpunkLogo className="scale-75" />
                                 <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-gray-500 hover:text-white transition-colors">
                                     <XIcon className="w-8 h-8" />
                                 </button>
@@ -250,38 +251,28 @@ const LandingNavbar: React.FC<LandingNavbarProps> = ({ onOpenAuth, onOpenContact
                             
                             <div className="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-12">
                                 <div className="space-y-6">
-                                    <div className="text-[10px] font-mono text-polygon-purple-light uppercase font-black tracking-[0.4em] mb-4">Core_Systems</div>
+                                    <div className="text-[9px] font-mono text-polygon-purple-light uppercase font-black tracking-[0.3em] mb-4">Core_Systems</div>
+                                    <button 
+                                        onClick={() => handleModuleClick('documentation', 'pitch-deck')}
+                                        className="w-full flex items-center gap-5 p-3.5 bg-yellow-500/5 border border-yellow-500/10 hover:border-yellow-500 transition-all text-left"
+                                    >
+                                        <StarIcon className="w-5 h-5 text-yellow-500" />
+                                        <div>
+                                            <div className="text-xs font-black text-white uppercase tracking-wider">Investor Deck</div>
+                                            <div className="text-[8px] text-gray-500 font-mono mt-0.5">Presentation // S1</div>
+                                        </div>
+                                    </button>
                                     {PLATFORM_MODULES.map((module, i) => (
                                         <button 
                                             key={i}
                                             onClick={() => handleModuleClick(module.id, module.secondary)}
-                                            className="w-full flex items-center gap-6 p-4 bg-white/[0.02] border border-white/5 hover:border-polygon-purple transition-all text-left group"
+                                            className="w-full flex items-center gap-5 p-3.5 bg-white/[0.02] border border-white/5 hover:border-polygon-purple transition-all text-left group"
                                         >
-                                            <module.icon className="w-6 h-6 text-polygon-purple-light group-hover:scale-110 transition-transform" />
+                                            <module.icon className="w-5 h-5 text-polygon-purple-light group-hover:scale-110 transition-transform" />
                                             <div>
-                                                <div className="text-sm font-black text-white uppercase tracking-wider">{module.title}</div>
-                                                <div className="text-[10px] text-gray-500 font-mono mt-1">{module.tag} // Ready</div>
+                                                <div className="text-xs font-black text-white uppercase tracking-wider">{module.title}</div>
+                                                <div className="text-[8px] text-gray-500 font-mono mt-0.5">{module.tag} // Ready</div>
                                             </div>
-                                        </button>
-                                    ))}
-                                </div>
-
-                                <div className="space-y-6">
-                                    <div className="text-[10px] font-mono text-gray-600 uppercase font-black tracking-[0.4em] mb-4">Resources</div>
-                                    {['Documentation', 'Governance', 'Security SLA'].map(item => (
-                                        <button 
-                                            key={item}
-                                            onClick={() => {
-                                                if (item === 'Documentation') handleModuleClick('documentation', 'intro');
-                                                if (item === 'Governance') handleModuleClick('ecosystem-insights', 'dao-advisor');
-                                                setIsMobileMenuOpen(false);
-                                            }}
-                                            className="w-full text-left text-xl font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-colors group"
-                                        >
-                                            <span className="relative">
-                                                {item}
-                                                <div className="absolute -bottom-1 left-0 w-0 h-[2px] bg-polygon-purple group-hover:w-12 transition-all"></div>
-                                            </span>
                                         </button>
                                     ))}
                                 </div>
@@ -290,7 +281,7 @@ const LandingNavbar: React.FC<LandingNavbarProps> = ({ onOpenAuth, onOpenContact
                             <div className="p-8 bg-[#080808] border-t border-white/5 space-y-4">
                                 <Button 
                                     onClick={() => onOpenAuth('signup')}
-                                    className="w-full py-5 !bg-white !text-black uppercase font-black tracking-widest rounded-none border-none shadow-[0_0_20px_rgba(255,255,255,0.05)]"
+                                    className="w-full py-4 !bg-white !text-black uppercase font-black tracking-widest rounded-none border-none"
                                 >
                                     INITIALIZE_SESSION
                                 </Button>
