@@ -1,6 +1,9 @@
 # 🛡️ PolyGuard: Institutional AI & Zero-Knowledge Security Infrastructure for Polygon AggLayer
 
 <p align="center">
+  <a href="https://polyguard.ai.studio" target="_blank">
+    <img src="https://img.shields.io/badge/Live_Demo-polyguard.ai.studio-FF4500?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Live Platform Demo" />
+  </a>
   <img src="https://img.shields.io/badge/Polygon-AggLayer_LxLy-8247E5?style=for-the-badge&logo=polygon&logoColor=white" alt="Polygon AggLayer" />
   <img src="https://img.shields.io/badge/Google_Gemini-3.6_Flash_/_1.5_Pro-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Gemini AI" />
   <img src="https://img.shields.io/badge/ZK--SNARKs-Groth16_/_Plonky2-000000?style=for-the-badge&logo=gnubash&logoColor=white" alt="ZK Proofs" />
@@ -16,6 +19,9 @@
  |_|    \____/|_____|  |_| \____|\___//_/   \_\_| \_\____/ 
    UNIFIED REAL-TIME SECURITY ENGINE FOR THE POLYGON AGGLAYER
 ```
+
+> **🌐 Live Production Application Demo:** [https://polyguard.ai.studio](https://polyguard.ai.studio)  
+> Explore the live PolyGuard Security Operations Center, real-time transaction simulator, multi-agent AI code auditor, and zero-knowledge compliance engine.
 
 ---
 
