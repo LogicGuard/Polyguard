@@ -1,0 +1,13 @@
+[package]
+name = "polyguard-halo2-compliance"
+version = "0.1.0"
+edition = "2021"
+description = "PolyGuard Rust Halo2 Plonkish Regulatory Compliance Circuits"
+license = "MIT"
+
+[dependencies]
+halo2_proofs = { version = "0.3", default-features = false }
+
+[features]
+default = ["std"]
+std = []
