@@ -1,6 +1,8 @@
 {
-  "name": "PolyGuard",
-  "description": "A modular, highly decoupled security infrastructure for Polygon. Engineered with isolated feature modules to ensure zero-regression development and expert-grade resilience.",
+  "name": "PolyGuard v3.0",
+  "description": "Autonomous security, intelligence, and threat prevention platform for Polygon ecosystem smart contracts, network traffic, and compliance.",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

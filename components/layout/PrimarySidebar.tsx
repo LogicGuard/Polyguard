@@ -9,6 +9,7 @@ import {
     SettingsIcon, UserIcon, BellIcon, MicIcon 
 } from '../Icons';
 import { useWallet } from '../../context/WalletContext';
+import { useNavigation } from '../../context/NavigationContext';
 import SidebarToolOverlay from './SidebarToolOverlay';
 
 interface PrimarySidebarProps {
@@ -21,6 +22,7 @@ interface PrimarySidebarProps {
 
 const PrimarySidebar: React.FC<PrimarySidebarProps> = ({ items, activeItem, activeSubItem, onItemClick, onSubItemClick }) => {
   const { account } = useWallet();
+  const { navigateTo } = useNavigation();
   const [time, setTime] = useState(new Date());
   const [activeOverlay, setActiveOverlay] = useState<'settings' | 'alerts' | 'terminal' | 'profile' | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -30,6 +32,18 @@ const PrimarySidebar: React.FC<PrimarySidebarProps> = ({ items, activeItem, acti
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  const handleExecuteCmd = (cmd: string) => {
+      setSearchQuery('');
+      setIsSearchFocused(false);
+      if (cmd === 'AUDIT_CONTRACT') {
+          navigateTo('security-audits', 'smart-contract-auditor');
+      } else if (cmd === 'SCAN_MEMPOOL') {
+          navigateTo('real-time-security', 'transaction-analysis');
+      } else if (cmd === 'NETWORK_TRAFFIC') {
+          navigateTo('real-time-security', 'on-chain-monitor');
+      }
+  };
 
   const formatTime = (date: Date) => date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
@@ -79,7 +93,7 @@ const PrimarySidebar: React.FC<PrimarySidebarProps> = ({ items, activeItem, acti
                     >
                         <div className="text-[7px] font-mono text-gray-600 uppercase mb-2 px-2">Heuristic_Predictions</div>
                         {['AUDIT_CONTRACT', 'SCAN_MEMPOOL', 'NETWORK_TRAFFIC'].filter(c => c.toLowerCase().includes(searchQuery.toLowerCase())).map((cmd, i) => (
-                            <button key={i} className="w-full text-left p-2 hover:bg-white/5 text-[8px] font-mono text-gray-400 hover:text-blue-400 transition-colors uppercase font-black">
+                            <button key={i} onClick={() => handleExecuteCmd(cmd)} className="w-full text-left p-2 hover:bg-white/5 text-[8px] font-mono text-gray-400 hover:text-blue-400 transition-colors uppercase font-black">
                                 &gt; {cmd}
                             </button>
                         ))}

@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { GasIcon, TrendingUpIcon, ActivityIcon, SearchIcon, BellIcon, HelpCircleIcon, ThreatIcon } from '../Icons';
 import { motion, AnimatePresence } from 'framer-motion';
 import NotificationCenter, { Notification } from './NotificationCenter';
+import { useNavigation } from '../../context/NavigationContext';
 
 export const SystemStatus: React.FC = () => {
   return (
@@ -97,6 +98,40 @@ export const NetworkStats: React.FC = () => {
 };
 
 export const GlobalSearch: React.FC = () => {
+    const { navigateTo } = useNavigation();
+    const [query, setQuery] = useState('');
+    const [isOpen, setIsOpen] = useState(false);
+
+    const searchTargets = [
+        { name: 'Smart Contract Auditor', targetPrimary: 'security-audits', targetSecondary: 'smart-contract-auditor', category: 'Audit' },
+        { name: 'Contract Scanner', targetPrimary: 'security-audits', targetSecondary: 'smart-contract-scanner', category: 'Audit' },
+        { name: 'Transaction Analysis', targetPrimary: 'real-time-security', targetSecondary: 'transaction-analysis', category: 'Security' },
+        { name: 'Smart Contract Firewall', targetPrimary: 'real-time-security', targetSecondary: 'smart-contract-firewall', category: 'Security' },
+        { name: 'On-Chain Monitor', targetPrimary: 'real-time-security', targetSecondary: 'on-chain-monitor', category: 'Monitor' },
+        { name: 'Threat Intelligence', targetPrimary: 'real-time-security', targetSecondary: 'threat-intelligence', category: 'Intel' },
+        { name: 'Wallet Report', targetPrimary: 'asset-intelligence', targetSecondary: 'wallet-report', category: 'Assets' },
+        { name: 'Portfolio Analysis', targetPrimary: 'asset-intelligence', targetSecondary: 'portfolio-analysis', category: 'Assets' },
+        { name: 'Gas Optimizer', targetPrimary: 'optimization-strategy', targetSecondary: 'gas-optimizer', category: 'Optimize' },
+        { name: 'ZK Compliance', targetPrimary: 'advanced-security', targetSecondary: 'zk-compliance', category: 'Compliance' },
+        { name: 'AI Specialist / Live Assistant', targetPrimary: 'live-assistant', targetSecondary: '', category: 'AI' },
+    ];
+
+    const filtered = query.trim().length > 0 
+        ? searchTargets.filter(item => item.name.toLowerCase().includes(query.toLowerCase()) || item.category.toLowerCase().includes(query.toLowerCase()))
+        : [];
+
+    const handleSelect = (primary: string, secondary?: string) => {
+        navigateTo(primary, secondary);
+        setQuery('');
+        setIsOpen(false);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && filtered.length > 0) {
+            handleSelect(filtered[0].targetPrimary, filtered[0].targetSecondary);
+        }
+    };
+
     return (
         <div className="relative w-full max-w-xs md:max-w-md hidden sm:block group">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -104,9 +139,35 @@ export const GlobalSearch: React.FC = () => {
             </div>
             <input
                 type="text"
+                value={query}
+                onChange={(e) => { setQuery(e.target.value); setIsOpen(true); }}
+                onFocus={() => setIsOpen(true)}
+                onBlur={() => setTimeout(() => setIsOpen(false), 200)}
+                onKeyDown={handleKeyDown}
                 className="block w-full pl-9 pr-12 py-1.5 border border-white/10 rounded-sm bg-[#0A0A0A] text-white placeholder-gray-700 focus:outline-none focus:border-blue-500 sm:text-[10px] font-mono"
-                placeholder="SEARCH_POLYGON..."
+                placeholder="SEARCH_POLYGON (e.g., Audit, Wallet, Gas, Threat)..."
             />
+            <AnimatePresence>
+                {isOpen && filtered.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -5 }}
+                        className="absolute top-full left-0 right-0 mt-1 bg-[#0A0A0A] border border-white/10 shadow-2xl z-50 p-2 space-y-1 max-h-60 overflow-y-auto custom-scrollbar"
+                    >
+                        {filtered.map((item, idx) => (
+                            <button
+                                key={idx}
+                                onMouseDown={() => handleSelect(item.targetPrimary, item.targetSecondary)}
+                                className="w-full flex justify-between items-center p-2 hover:bg-white/5 text-left text-[9px] font-mono text-gray-300 hover:text-blue-400 transition-colors"
+                            >
+                                <span>&gt; {item.name}</span>
+                                <span className="text-[7px] text-gray-600 uppercase border border-white/10 px-1 py-0.5">{item.category}</span>
+                            </button>
+                        ))}
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

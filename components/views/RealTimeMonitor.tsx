@@ -12,14 +12,64 @@ const MAX_ITEMS = 40;
 // Polling interval significantly increased and randomized to avoid synchronous quota bursts
 const POLL_INTERVAL_BASE = 150000; // Increased to 2.5 minutes base
 
+const INITIAL_ALERTS: SecurityAlert[] = [
+    {
+        id: 'alt_01',
+        title: 'UNVERIFIED_PROXY_IMPLEMENTATION_DETECTED',
+        severity: 'Warning',
+        description: 'New ERC-1967 transparent proxy deployed on Polygon PoS without verified source code on Polygonscan.',
+        timestamp: new Date().toISOString()
+    },
+    {
+        id: 'alt_02',
+        title: 'AGGLAYER_EXIT_ROOT_BATCH_PROOF_VERIFIED',
+        severity: 'Info',
+        description: 'Unified LxLy bridge batch proof verified by ZK Prover engine with 0 nullifier conflicts.',
+        timestamp: new Date(Date.now() - 45000).toISOString()
+    },
+    {
+        id: 'alt_03',
+        title: 'MEV_SANDWICH_PATTERN_INTERCEPTED',
+        severity: 'Critical',
+        description: 'Pre-execution RPC firewall blocked a high-gas frontrunning attempt targeting QuickSwap pool.',
+        timestamp: new Date(Date.now() - 120000).toISOString()
+    }
+];
+
+const INITIAL_EVENTS: OnChainEvent[] = [
+    {
+        id: 'evt_01',
+        type: 'Flash Loan',
+        details: '1,200,000 POL Flash Loan borrowed from Aave V3. Transaction simulation completed nominal.',
+        address: '0x35f...82A1',
+        timestamp: new Date().toISOString()
+    },
+    {
+        id: 'evt_02',
+        type: 'Bridge Transfer',
+        details: '250,000 USDC bridged from Ethereum L1 to Polygon zkEVM via LxLy Exit Root.',
+        address: '0xA0b...eB48',
+        timestamp: new Date(Date.now() - 60000).toISOString()
+    },
+    {
+        id: 'evt_03',
+        type: 'Contract Deployment',
+        details: 'Bytecode initialized at 0x71C...49A2. Slither security scan score: 96/100.',
+        address: '0x71C...49A2',
+        timestamp: new Date(Date.now() - 180000).toISOString()
+    }
+];
+
 const RealTimeMonitor: React.FC = () => {
     const { navigateTo } = useNavigation();
-    const [alerts, setAlerts] = useState<SecurityAlert[]>([]);
-    const [events, setEvents] = useState<OnChainEvent[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [alerts, setAlerts] = useState<SecurityAlert[]>(INITIAL_ALERTS);
+    const [events, setEvents] = useState<OnChainEvent[]>(INITIAL_EVENTS);
+    const [isLoading, setIsLoading] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'alerts' | 'events'>('alerts');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [inspectedItem, setInspectedItem] = useState<SecurityAlert | OnChainEvent | null>(null);
     const [isPaused, setIsPaused] = useState(false);
     const [isCongested, setIsCongested] = useState(getSystemStatus().isCoolingDown);
 
@@ -129,10 +179,19 @@ const RealTimeMonitor: React.FC = () => {
     };
 
     const renderList = (items: (SecurityAlert | OnChainEvent)[]) => {
+        const filteredItems = items.filter(item => {
+            if (!searchQuery) return true;
+            const q = searchQuery.toLowerCase();
+            const isAlert = 'severity' in item;
+            const title = isAlert ? (item as SecurityAlert).title : (item as OnChainEvent).type;
+            const desc = isAlert ? (item as SecurityAlert).description : (item as OnChainEvent).details;
+            return title.toLowerCase().includes(q) || desc.toLowerCase().includes(q);
+        });
+
         return (
             <div className="space-y-1.5 pr-1.5 h-full overflow-y-auto custom-scrollbar pb-4 flex flex-col relative">
                 <AnimatePresence initial={false}>
-                    {items.map((item, idx) => {
+                    {filteredItems.map((item, idx) => {
                         if (!item) return null;
                         const isAlert = 'severity' in item;
                         const { color, bg, border, Icon } = isAlert 
@@ -149,7 +208,8 @@ const RealTimeMonitor: React.FC = () => {
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
                                 transition={{ duration: 0.3 }}
-                                className={`flex flex-col gap-2 p-3 rounded-sm border ${border} ${bg} bg-opacity-[0.02] hover:bg-opacity-[0.06] transition-all group cursor-default relative overflow-hidden`}
+                                className={`flex flex-col gap-2 p-3 rounded-sm border ${border} ${bg} bg-opacity-[0.02] hover:bg-opacity-[0.06] transition-all group cursor-pointer relative overflow-hidden`}
+                                onClick={() => setInspectedItem(item)}
                             >
                                 <div className="flex items-start gap-3">
                                     <div className={`mt-1 p-1 rounded-sm ${bg} bg-opacity-20 flex-shrink-0`}>
@@ -162,28 +222,32 @@ const RealTimeMonitor: React.FC = () => {
                                             </span>
                                             <span className="text-[8px] font-mono text-gray-600 font-bold uppercase ml-2">{formatTimeAgo(item.timestamp)}</span>
                                         </div>
-                                        <p className="text-[10px] text-gray-500 leading-tight font-mono line-clamp-2">
+                                        <p className="text-[10px] text-gray-400 leading-tight font-mono line-clamp-2">
                                             {description}
                                         </p>
                                     </div>
                                 </div>
                                 
-                                <div className="mt-2 pt-2 border-t border-white/5 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="mt-2 pt-2 border-t border-white/5 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <span className="text-[7.5px] font-mono text-gray-500 uppercase">ID: #{item.id}</span>
                                     <button 
-                                        onClick={() => navigateTo('real-time-security', 'transaction-analysis')}
-                                        className="text-[8px] font-mono font-black uppercase px-2 py-1 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors border border-white/5"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setInspectedItem(item);
+                                        }}
+                                        className="text-[8px] font-mono font-black uppercase px-2 py-1 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white transition-colors border border-white/5"
                                     >
-                                        Inspect
+                                        Inspect Signal
                                     </button>
                                 </div>
                             </motion.div>
                         );
                     })}
                 </AnimatePresence>
-                {items.length === 0 && !isLoading && (
-                    <div className="flex-1 flex flex-col items-center justify-center opacity-20 py-20">
-                         <ActivityIcon className="w-8 h-8 mb-4" />
-                         <span className="text-[9px] font-mono uppercase tracking-[0.4em]">Buffer_Empty</span>
+                {filteredItems.length === 0 && !isLoading && (
+                    <div className="flex-1 flex flex-col items-center justify-center opacity-40 py-16 text-center">
+                         <ActivityIcon className="w-8 h-8 mb-2 text-gray-600" />
+                         <span className="text-[9px] font-mono uppercase text-gray-500 tracking-[0.2em]">No matching signals found</span>
                     </div>
                 )}
             </div>
@@ -200,33 +264,54 @@ const RealTimeMonitor: React.FC = () => {
                 </div>
             )}
 
-            <div className="p-4 border-b border-white/5 flex justify-between items-center bg-[#080808] flex-shrink-0">
-                <div className="flex items-center gap-3">
-                    <div className={`w-1.5 h-1.5 rounded-full ${isCongested ? 'bg-red-500' : isPaused ? 'bg-yellow-500' : 'bg-green-500'} animate-flicker shadow-[0_0_8px_currentColor]`}></div>
-                    <h2 className="text-[10px] font-mono font-black uppercase text-white tracking-[0.3em]">
-                        Signal_Stream
-                    </h2>
-                </div>
-                <div className="flex items-center gap-3">
-                    <button 
-                        onClick={() => fetchData()}
-                        disabled={isRefreshing || isCongested}
-                        className={`p-1.5 rounded-sm transition-all ${isRefreshing ? 'opacity-50' : 'hover:bg-white/5 text-gray-500 hover:text-white'}`}
-                        title="Force Refresh"
-                    >
-                        <RefreshIcon className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-                    </button>
-                    <div className="flex gap-1 bg-black/40 p-1 rounded-sm border border-white/5">
-                        {['alerts', 'events'].map(tab => (
-                            <button 
-                                key={tab}
-                                onClick={() => setActiveTab(tab as any)}
-                                className={`px-2 py-1 text-[8px] font-mono font-black uppercase transition-all ${activeTab === tab ? 'bg-white/10 text-white' : 'text-gray-600 hover:text-gray-400'}`}
-                            >
-                                {tab}
-                            </button>
-                        ))}
+            <div className="p-3 border-b border-white/5 flex flex-col gap-2 bg-[#080808] flex-shrink-0">
+                <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                        <div className={`w-1.5 h-1.5 rounded-full ${isCongested ? 'bg-red-500' : isPaused ? 'bg-yellow-500' : 'bg-green-500'} animate-flicker shadow-[0_0_8px_currentColor]`}></div>
+                        <h2 className="text-[10px] font-mono font-black uppercase text-white tracking-[0.3em]">
+                            Signal_Stream
+                        </h2>
                     </div>
+                    <div className="flex items-center gap-2">
+                        <button 
+                            onClick={() => fetchData()}
+                            disabled={isRefreshing || isCongested}
+                            className={`p-1.5 rounded-sm transition-all ${isRefreshing ? 'opacity-50' : 'hover:bg-white/5 text-gray-500 hover:text-white'}`}
+                            title="Force Refresh"
+                        >
+                            <RefreshIcon className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                        </button>
+                        <div className="flex gap-1 bg-black/40 p-1 rounded-sm border border-white/5">
+                            {['alerts', 'events'].map(tab => (
+                                <button 
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab as any)}
+                                    className={`px-2 py-1 text-[8px] font-mono font-black uppercase transition-all ${activeTab === tab ? 'bg-white/10 text-white' : 'text-gray-600 hover:text-gray-400'}`}
+                                >
+                                    {tab}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Quick Search Filter */}
+                <div className="relative">
+                    <input 
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="SEARCH_SIGNALS_BY_KEYWORD_OR_HASH..."
+                        className="w-full bg-black/60 border border-white/5 text-[8.5px] font-mono text-white placeholder-gray-600 px-2.5 py-1 focus:outline-none focus:border-blue-500/40 uppercase tracking-widest"
+                    />
+                    {searchQuery && (
+                        <button 
+                            onClick={() => setSearchQuery('')}
+                            className="absolute right-2 top-1 text-[8px] font-mono text-gray-500 hover:text-white"
+                        >
+                            ✕
+                        </button>
+                    )}
                 </div>
             </div>
             
@@ -266,11 +351,96 @@ const RealTimeMonitor: React.FC = () => {
             
             <div className="p-2 border-t border-white/5 bg-black/80 backdrop-blur-md flex justify-between items-center text-[7px] font-mono text-gray-700 uppercase tracking-widest flex-shrink-0">
                  <div className="flex items-center gap-2">
-                    <ShieldCheckIcon className="w-2.5 h-2.5" />
+                    <ShieldCheckIcon className="w-2.5 h-2.5 text-blue-500" />
                     Handshake Status: {isCongested ? 'THROTTLED' : 'STABLE'}
                  </div>
                  <span>P_ID: {Math.random().toString(36).substr(2, 6).toUpperCase()}</span>
             </div>
+
+            {/* SIGNAL INSPECTION MODAL */}
+            <AnimatePresence>
+                {inspectedItem && (
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 z-50 bg-black/90 backdrop-blur-md p-5 flex flex-col justify-between"
+                    >
+                        <div className="flex justify-between items-start border-b border-white/10 pb-3">
+                            <div className="flex items-center gap-2.5">
+                                <ThreatIcon className="w-4 h-4 text-blue-400" />
+                                <div>
+                                    <h3 className="text-xs font-mono font-black text-white tracking-widest uppercase">
+                                        {'severity' in inspectedItem ? inspectedItem.title : inspectedItem.type}
+                                    </h3>
+                                    <span className="text-[8px] font-mono text-gray-500 uppercase">
+                                        Signal ID: #{inspectedItem.id} // Polygon Telemetry
+                                    </span>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => setInspectedItem(null)}
+                                className="px-2.5 py-1 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 text-[8px] font-mono font-black uppercase"
+                            >
+                                CLOSE [ESC]
+                            </button>
+                        </div>
+
+                        <div className="my-3 space-y-3 overflow-y-auto custom-scrollbar flex-1 pr-1">
+                            <div className="p-3 bg-white/[0.02] border border-white/5 rounded-none space-y-1">
+                                <span className="text-[7.5px] font-mono text-gray-500 uppercase font-black">Description & Payload</span>
+                                <p className="text-[10px] font-mono text-gray-300 leading-relaxed">
+                                    {'severity' in inspectedItem ? inspectedItem.description : inspectedItem.details}
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2">
+                                <div className="p-2.5 bg-white/[0.02] border border-white/5 space-y-0.5">
+                                    <span className="text-[7px] font-mono text-gray-500 uppercase font-black">Timestamp</span>
+                                    <div className="text-[9px] font-mono text-white">{new Date(inspectedItem.timestamp).toLocaleTimeString()}</div>
+                                </div>
+                                <div className="p-2.5 bg-white/[0.02] border border-white/5 space-y-0.5">
+                                    <span className="text-[7px] font-mono text-gray-500 uppercase font-black">Risk Severity</span>
+                                    <div className="text-[9px] font-mono text-blue-400 font-bold uppercase">
+                                        {'severity' in inspectedItem ? inspectedItem.severity : 'Nominal Event'}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="p-2.5 bg-black/80 border border-white/5 font-mono text-[8px] text-gray-400 space-y-1">
+                                <div className="text-gray-500 font-black uppercase text-[7px]">Simulated Mitigation Code</div>
+                                <div className="text-blue-400/90 selection:bg-blue-500/20">
+                                    {`// PolyGuard Firewall Defense
+function enforceShield(address target) external {
+    require(!isBlacklisted(target), "BLOCKED_BY_FIREWALL");
+}`}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-2 pt-3 border-t border-white/10">
+                            <button 
+                                onClick={() => {
+                                    setInspectedItem(null);
+                                    navigateTo('real-time-security', 'transaction-analysis');
+                                }}
+                                className="flex-1 py-2 bg-blue-600 hover:bg-blue-500 text-white font-mono text-[8.5px] font-black uppercase tracking-widest transition-all"
+                            >
+                                Open Full Inspector
+                            </button>
+                            <button 
+                                onClick={() => {
+                                    setInspectedItem(null);
+                                    navigateTo('real-time-security', 'smart-contract-firewall');
+                                }}
+                                className="flex-1 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 hover:text-white font-mono text-[8.5px] font-black uppercase tracking-widest transition-all"
+                            >
+                                Block In Firewall
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </Card>
     );
 };

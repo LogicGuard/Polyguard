@@ -103,9 +103,53 @@ const SmartContractAuditorView: React.FC = () => {
                         <div className="flex items-center gap-4">
                             <span className="text-white font-bold">SOURCE_BUFFER.SOL</span>
                         </div>
-                        <div className="flex gap-1.5">
-                            <div className="w-2 h-2 rounded-full bg-white/5"></div>
-                            <div className="w-2 h-2 rounded-full bg-white/5"></div>
+                        <div className="flex items-center gap-2">
+                            <button 
+                                onClick={() => setCode(`// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+contract VulnerableVault {
+    mapping(address => uint256) public balances;
+
+    function deposit() public payable {
+        balances[msg.sender] += msg.value;
+    }
+
+    function withdraw() public {
+        uint256 amount = balances[msg.sender];
+        require(amount > 0, "No funds");
+        (bool success, ) = msg.sender.call{value: amount}("");
+        require(success, "Transfer failed");
+        balances[msg.sender] = 0; // Reentrancy flaw!
+    }
+}`)}
+                                className="px-2 py-0.5 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 text-[8px] font-mono transition-colors"
+                            >
+                                LOAD_VULNERABLE_SAMPLE
+                            </button>
+                            <button 
+                                onClick={() => setCode(`// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+contract PolygonStakingManager {
+    address public owner;
+    mapping(address => uint256) public stakedBalance;
+
+    constructor() { owner = msg.sender; }
+
+    function stake() external payable {
+        stakedBalance[msg.sender] += msg.value;
+    }
+
+    function emergencyDrain() external {
+        require(msg.sender == owner, "Unauthorized");
+        payable(owner).transfer(address(this).balance);
+    }
+}`)}
+                                className="px-2 py-0.5 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 text-[8px] font-mono transition-colors"
+                            >
+                                LOAD_STAKING_SAMPLE
+                            </button>
                         </div>
                     </div>
                      <Card className="p-0 flex-1 relative flex flex-col cyber-card overflow-hidden">
