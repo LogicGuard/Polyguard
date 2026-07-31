@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="./public/polyguard-logo.jpg" alt="PolyGuard Logo" width="180" style="border-radius: 16px;" />
-</p>
-
 # 🛡️ PolyGuard: Institutional AI & Zero-Knowledge Security Infrastructure for Polygon AggLayer
 
 <p align="center">
