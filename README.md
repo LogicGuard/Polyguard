@@ -1,7 +1,5 @@
 # 🛡️ PolyGuard: Institutional AI & Zero-Knowledge Security Infrastructure for Polygon AggLayer
 
-![Uploading PolyGuard_Raster_UI_Assets_v4.png…]()
-
 <p align="center">
   <a href="https://polyguard.ai.studio" target="_blank">
     <img src="https://img.shields.io/badge/Live_Demo-polyguard.ai.studio-FF4500?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Live Platform Demo" />
