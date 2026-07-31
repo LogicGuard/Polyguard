@@ -13,13 +13,21 @@ const simpleMarkdownParser = (text: string): string => {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
 
-  // 1. Handle Code Blocks with institutional headers
+  // 1. Handle Code Blocks with institutional headers and language badges
   const parts = html.split(/(```[\s\S]*?```)/g);
   
   const processedParts = parts.map((part, index) => {
       if (index % 2 === 1) { // It's a code block
-          const codeContent = part.replace(/```(\w*\n)?/g, '').trim();
-          return `<div class="my-8 rounded-none overflow-hidden border border-white/10 bg-[#0C0C0C]"><div class="px-5 py-2.5 bg-white/5 border-b border-white/5 flex justify-between items-center"><span class="text-[9px] font-mono text-gray-500 uppercase tracking-[0.2em] font-black">Data_Payload_Buffer</span><div class="flex gap-1.5"><div class="w-1.5 h-1.5 rounded-full bg-white/10"></div><div class="w-1.5 h-1.5 rounded-full bg-white/10"></div></div></div><pre class="p-6 overflow-x-auto text-xs font-mono text-blue-300 custom-scrollbar leading-relaxed"><code>${codeContent}</code></pre></div>`;
+          const matchLang = part.match(/^```([a-zA-Z0-9_\-\+]+)/);
+          const lang = matchLang ? matchLang[1].toUpperCase() : 'KERNEL_CODE';
+          const codeContent = part.replace(/^```[^\n]*\n?/, '').replace(/```$/, '').trim();
+          const langBadgeClass = lang.includes('RUST') ? 'bg-orange-500/10 border-orange-500/30 text-orange-400' :
+                                 lang.includes('GO') ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400' :
+                                 lang.includes('SOLIDITY') || lang.includes('YUL') ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400' :
+                                 lang.includes('CIRCOM') ? 'bg-purple-500/10 border-purple-500/30 text-purple-400' :
+                                 lang.includes('HUFF') || lang.includes('MOVE') ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' :
+                                 'bg-blue-500/10 border-blue-500/20 text-blue-400';
+          return `<div class="my-8 rounded-none overflow-hidden border border-white/10 bg-[#0C0C0C]"><div class="px-5 py-2.5 bg-white/5 border-b border-white/5 flex justify-between items-center"><div class="flex items-center gap-2.5"><span class="px-2 py-0.5 border ${langBadgeClass} text-[9px] font-mono font-black uppercase tracking-widest">${lang}</span><span class="text-[9px] font-mono text-gray-500 uppercase tracking-[0.2em] font-black">// SPEC_PAYLOAD_BUFFER</span></div><div class="flex gap-1.5"><div class="w-1.5 h-1.5 rounded-full bg-white/10"></div><div class="w-1.5 h-1.5 rounded-full bg-white/10"></div></div></div><pre class="p-6 overflow-x-auto text-xs font-mono text-blue-300 custom-scrollbar leading-relaxed"><code>${codeContent}</code></pre></div>`;
       }
 
       return part

@@ -8,8 +8,231 @@ import { SmartContractAuditResult } from '../../types';
 import { AuditorIcon, CpuIcon, ShieldCheckIcon, ActivityIcon, ZapIcon, ThreatIcon } from '../Icons';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const SAMPLE_SOL_YUL = `// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.28;
+
+/// @title Polygon AggLayer LxLy Exit Root Bridge Verifier (with Yul Inline Assembly)
+/// @notice Verifies cryptographic Merkle exit proofs and protects against replay/double-spend
+contract AggLayerExitVerifier {
+    bytes32 public l1MerkleRoot;
+    mapping(bytes32 => bool) public nullifierSpent;
+
+    event ExitProofVerified(uint32 indexed rollupId, bytes32 indexed leafHash, address recipient);
+
+    constructor(bytes32 _initialRoot) {
+        l1MerkleRoot = _initialRoot;
+    }
+
+    function verifyExitProof(
+        uint32 rollupId,
+        bytes32 leafHash,
+        bytes32[] calldata merkleProof,
+        address recipient,
+        uint256 amount
+    ) external returns (bool valid) {
+        bytes32 nullifier = keccak256(abi.encodePacked(rollupId, leafHash));
+        require(!nullifierSpent[nullifier], "ERR_NULLIFIER_ALREADY_SPENT");
+
+        bytes32 computedHash = leafHash;
+        uint256 proofLength = merkleProof.length;
+
+        // Ultra-optimized Yul (Inline Assembly) loop for Keccak256 Merkle tree hashing
+        assembly {
+            let ptr := mload(0x40)
+            for { let i := 0 } lt(i, proofLength) { i := add(i, 1) } {
+                let sibling := calldataload(add(merkleProof.offset, mul(i, 0x20)))
+                switch lt(computedHash, sibling)
+                case 1 {
+                    mstore(ptr, computedHash)
+                    mstore(add(ptr, 0x20), sibling)
+                }
+                default {
+                    mstore(ptr, sibling)
+                    mstore(add(ptr, 0x20), computedHash)
+                }
+                computedHash := keccak256(ptr, 0x40)
+            }
+        }
+
+        require(computedHash == l1MerkleRoot, "ERR_INVALID_MERKLE_EXIT_ROOT");
+        nullifierSpent[nullifier] = true;
+        emit ExitProofVerified(rollupId, leafHash, recipient);
+        return true;
+    }
+}`;
+
+const SAMPLE_RUST_ZK = `// PolyGuard Rust Stylus / ZK-Rollup State Transition Contract (#![no_std])
+// Written in Rust for high-performance execution inside Polygon VM / Arbitrum Stylus
+#![no_std]
+extern crate alloc;
+
+use alloc::vec::Vec;
+use stylus_sdk::{alloy_primitives::{Address, B256, U256, keccak256}, prelude::*};
+
+sol_storage! {
+    #[entrypoint]
+    pub struct ZkStateVerifierContract {
+        bytes32 l1_state_root;
+        mapping(bytes32 => bool) finalized_rollups;
+        uint256 total_verified_batches;
+    }
+}
+
+#[external]
+impl ZkStateVerifierContract {
+    pub fn verify_rollup_batch(
+        &mut self,
+        rollup_id: U256,
+        batch_root: B256,
+        zk_snark_proof: Vec<u8>
+    ) -> Result<bool, Vec<u8>> {
+        let commitment = keccak256(&[rollup_id.to_be_bytes_vec(), batch_root.to_vec()].concat());
+        
+        // Prevent re-processing of finalized batches
+        if self.finalized_rollups.get(commitment) {
+            return Err("ERR: Rollup batch already finalized in state tree".into());
+        }
+
+        // Validate Groth16 / Plonky2 ZK proof integrity via precompile
+        let proof_valid = self.verify_groth16_precompile(&zk_snark_proof, batch_root);
+        if !proof_valid {
+            return Err("ERR: Zero-Knowledge proof signature verification failed".into());
+        }
+
+        self.finalized_rollups.insert(commitment, true);
+        let current_count = self.total_verified_batches.get();
+        self.total_verified_batches.set(current_count + U256::from(1));
+
+        Ok(true)
+    }
+}`;
+
+const SAMPLE_GO_CONSENSUS = `// PolyGuard Go (Golang) AggLayer LxLy Bridge Consensus Node Validator
+package consensus
+
+import (
+	"crypto/sha256"
+	"errors"
+	"fmt"
+	"sync"
+	"time"
+)
+
+type LxLyMerkleValidator struct {
+	mu            sync.RWMutex
+	L1Commitments map[uint32][]byte
+	PendingRoots  map[uint32][]byte
+	LastSyncTime  time.Time
+}
+
+// ValidateBridgeExitRoot checks balance invariants across L2 chains using Go routines
+func (v *LxLyMerkleValidator) ValidateBridgeExitRoot(
+	chainID uint32,
+	proposedRoot []byte,
+	proofSiblings [][]byte,
+) (bool, error) {
+	v.mu.Lock()
+	defer v.mu.Unlock()
+
+	if len(proposedRoot) != 32 {
+		return false, errors.New("ERR_INVALID_ROOT_LENGTH: expected 32 bytes")
+	}
+
+	computed := proposedRoot
+	for i, sibling := range proofSiblings {
+		hash := sha256.Sum256(append(computed, sibling...))
+		computed = hash[:]
+		if i == 0 {
+			fmt.Printf("[GO CONSENSUS DEBUG] Sibling %d validated for Chain %d\\n", i, chainID)
+		}
+	}
+
+	committedRoot, exists := v.L1Commitments[chainID]
+	if !exists || string(computed) != string(committedRoot) {
+		return false, errors.New("ERR_AGGLAYER_ROOT_MISMATCH: proof does not match L1 state")
+	}
+
+	v.LastSyncTime = time.Now().UTC()
+	return true, nil
+}`;
+
+const SAMPLE_CIRCOM = `// PolyGuard Privacy-Preserving Solvency & AML Regulatory Circuit
+// Language: Circom 2.1.8 (ZK-SNARK / Groth16 & Plonky2)
+pragma circom 2.1.8;
+
+include "../node_modules/circomlib/circuits/poseidon.circom";
+include "../node_modules/circomlib/circuits/comparators.circom";
+
+template RegulatorySolvencyCircuit(DEPTH) {
+    // Private witness inputs (Hidden from public observers)
+    signal input userAddress;
+    signal input balanceAssetA;
+    signal input balanceAssetB;
+    signal input amlPathSiblings[DEPTH];
+    signal input amlPathIndices[DEPTH];
+
+    // Public inputs (Regulatory thresholds & sanction lists)
+    signal input minRequiredTotalUsd;
+    signal input sanctionMerkleRoot;
+
+    // Public output claim
+    signal output isAccreditedAndSolvent;
+
+    // 1. Verify user solvency without leaking exact asset balance
+    signal totalBalance <-- balanceAssetA + balanceAssetB;
+    component comp = GreaterEqThan(64);
+    comp.in[0] <== totalBalance;
+    comp.in[1] <== minRequiredTotalUsd;
+    comp.out === 1;
+
+    // 2. Verify non-sanction inclusion in AML Merkle Tree
+    component hasher = Poseidon(2);
+    hasher.inputs[0] <== userAddress;
+    hasher.inputs[1] <== 0; // Null leaf check
+
+    isAccreditedAndSolvent <-- comp.out;
+}
+
+component main {public [minRequiredTotalUsd, sanctionMerkleRoot]} = RegulatorySolvencyCircuit(20);`;
+
+const SAMPLE_HUFF = `/// @title PolyGuard Minimal-Gas Vault (Huff EVM Low-Level Assembly)
+/// @notice Ultra-efficient EVM bytecode contract eliminating Solidity compiler overhead
+/// @author PolyGuard Security Kernel
+
+#define function deposit() payable returns ()
+#define function withdraw(uint256) nonpayable returns ()
+
+#define constant BALANCE_SLOT = 0x00
+#define constant OWNER_SLOT = 0x01
+
+#define macro DEPOSIT() = takes (0) returns (0) {
+    caller              // [msg.sender]
+    0x00 mstore         // [] -> store caller in memory
+    0x20 0x00 sha3      // [storage_slot] -> keccak256(msg.sender)
+    
+    dup1 sload          // [current_balance, storage_slot]
+    callvalue add       // [new_balance, storage_slot]
+    swap1 sstore        // [] -> update balance in storage
+    stop
+}
+
+#define macro MAIN() = takes (0) returns (0) {
+    0x00 calldataload 0xE0 shr // [selector]
+    
+    dup1 0xd0e30db0 eq deposit_jump jumpi
+    dup1 0x2e1a7d4d eq withdraw_jump jumpi
+    
+    0x00 0x00 revert
+
+    deposit_jump:
+        DEPOSIT()
+    withdraw_jump:
+        0x00 0x00 revert
+}`;
+
 const SmartContractAuditorView: React.FC = () => {
-    const [code, setCode] = useState('');
+    const [activeLang, setActiveLang] = useState<'SOL_YUL' | 'RUST_ZK' | 'GO_NODE' | 'CIRCOM' | 'HUFF'>('SOL_YUL');
+    const [code, setCode] = useState(SAMPLE_SOL_YUL);
     const [isLoading, setIsLoading] = useState(false);
     const [result, setResult] = useState<SmartContractAuditResult | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -99,56 +322,69 @@ const SmartContractAuditorView: React.FC = () => {
             <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-0">
                 {/* EDITOR SIDE */}
                 <div className="lg:col-span-5 flex flex-col h-[400px] lg:h-full overflow-hidden">
-                     <div className="bg-[#0A0A0A] border border-white/10 border-b-0 p-2 px-4 flex justify-between items-center text-[10px] font-mono text-gray-500 rounded-t-sm">
-                        <div className="flex items-center gap-4">
-                            <span className="text-white font-bold">SOURCE_BUFFER.SOL</span>
-                        </div>
+                     <div className="bg-[#0A0A0A] border border-white/10 border-b-0 p-2 px-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-[10px] font-mono text-gray-500 rounded-t-sm">
                         <div className="flex items-center gap-2">
+                            <span className="text-white font-bold">
+                                {activeLang === 'RUST_ZK' ? 'AGG_STATE_VERIFIER.rs' :
+                                 activeLang === 'GO_NODE' ? 'CONSENSUS_VALIDATOR.go' :
+                                 activeLang === 'CIRCOM' ? 'REGULATORY_SOLVENCY.circom' :
+                                 activeLang === 'HUFF' ? 'GAS_OPTIMIZED_VAULT.huff' :
+                                 'AGGLAYER_BRIDGE_EXIT.sol'}
+                            </span>
+                            <span className={`px-1.5 py-0.5 rounded-sm text-[8px] font-black uppercase tracking-widest border ${
+                                activeLang === 'RUST_ZK' ? 'bg-orange-500/10 border-orange-500/30 text-orange-400' :
+                                activeLang === 'GO_NODE' ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400' :
+                                activeLang === 'CIRCOM' ? 'bg-purple-500/10 border-purple-500/30 text-purple-400' :
+                                activeLang === 'HUFF' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' :
+                                'bg-indigo-500/10 border-indigo-500/30 text-indigo-400'
+                            }`}>
+                                {activeLang === 'RUST_ZK' ? 'RUST (STYLUS / ZK-VM)' :
+                                 activeLang === 'GO_NODE' ? 'GO (CONSENSUS NODE)' :
+                                 activeLang === 'CIRCOM' ? 'CIRCOM 2.1.8 (ZK)' :
+                                 activeLang === 'HUFF' ? 'HUFF (EVM BYTECODE)' :
+                                 'SOLIDITY 0.8.28 + YUL'}
+                            </span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-1.5">
                             <button 
-                                onClick={() => setCode(`// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
-
-contract VulnerableVault {
-    mapping(address => uint256) public balances;
-
-    function deposit() public payable {
-        balances[msg.sender] += msg.value;
-    }
-
-    function withdraw() public {
-        uint256 amount = balances[msg.sender];
-        require(amount > 0, "No funds");
-        (bool success, ) = msg.sender.call{value: amount}("");
-        require(success, "Transfer failed");
-        balances[msg.sender] = 0; // Reentrancy flaw!
-    }
-}`)}
-                                className="px-2 py-0.5 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 text-[8px] font-mono transition-colors"
+                                onClick={() => { setActiveLang('SOL_YUL'); setCode(SAMPLE_SOL_YUL); }}
+                                className={`px-2 py-0.5 border text-[8px] font-mono transition-all uppercase font-bold ${
+                                    activeLang === 'SOL_YUL' ? 'bg-indigo-500 text-black border-indigo-400' : 'bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border-white/10'
+                                }`}
                             >
-                                LOAD_VULNERABLE_SAMPLE
+                                SOL + YUL
                             </button>
                             <button 
-                                onClick={() => setCode(`// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
-
-contract PolygonStakingManager {
-    address public owner;
-    mapping(address => uint256) public stakedBalance;
-
-    constructor() { owner = msg.sender; }
-
-    function stake() external payable {
-        stakedBalance[msg.sender] += msg.value;
-    }
-
-    function emergencyDrain() external {
-        require(msg.sender == owner, "Unauthorized");
-        payable(owner).transfer(address(this).balance);
-    }
-}`)}
-                                className="px-2 py-0.5 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 text-[8px] font-mono transition-colors"
+                                onClick={() => { setActiveLang('RUST_ZK'); setCode(SAMPLE_RUST_ZK); }}
+                                className={`px-2 py-0.5 border text-[8px] font-mono transition-all uppercase font-bold ${
+                                    activeLang === 'RUST_ZK' ? 'bg-orange-500 text-black border-orange-400' : 'bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border-white/10'
+                                }`}
                             >
-                                LOAD_STAKING_SAMPLE
+                                RUST (ZK)
+                            </button>
+                            <button 
+                                onClick={() => { setActiveLang('GO_NODE'); setCode(SAMPLE_GO_CONSENSUS); }}
+                                className={`px-2 py-0.5 border text-[8px] font-mono transition-all uppercase font-bold ${
+                                    activeLang === 'GO_NODE' ? 'bg-cyan-500 text-black border-cyan-400' : 'bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border-white/10'
+                                }`}
+                            >
+                                GO (NODE)
+                            </button>
+                            <button 
+                                onClick={() => { setActiveLang('CIRCOM'); setCode(SAMPLE_CIRCOM); }}
+                                className={`px-2 py-0.5 border text-[8px] font-mono transition-all uppercase font-bold ${
+                                    activeLang === 'CIRCOM' ? 'bg-purple-500 text-white border-purple-400' : 'bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border-white/10'
+                                }`}
+                            >
+                                CIRCOM
+                            </button>
+                            <button 
+                                onClick={() => { setActiveLang('HUFF'); setCode(SAMPLE_HUFF); }}
+                                className={`px-2 py-0.5 border text-[8px] font-mono transition-all uppercase font-bold ${
+                                    activeLang === 'HUFF' ? 'bg-emerald-500 text-black border-emerald-400' : 'bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border-white/10'
+                                }`}
+                            >
+                                HUFF
                             </button>
                         </div>
                     </div>

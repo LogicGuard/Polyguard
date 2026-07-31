@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Card from '../common/Card';
 import Button from '../common/Button';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheckIcon, ZapIcon, LayersIcon, PlusIcon, RefreshIcon, CheckCircleIcon, CheckIcon, SearchIcon, CodeIcon, ClockIcon } from '../Icons';
+import { ShieldCheckIcon, ZapIcon, LayersIcon, PlusIcon, RefreshIcon, CheckCircleIcon, CheckIcon, CodeIcon, DownloadIcon } from '../Icons';
 import CyberpunkLogo from '../landing/CyberpunkLogo';
 
 const COLORS = [
@@ -15,11 +15,335 @@ const COLORS = [
 ];
 
 const ASSETS = [
-    { title: 'Vector Logo Pack', format: 'SVG', size: '12.4 KB', type: 'Logo', mime: 'image/svg+xml' },
-    { title: 'Raster UI Assets', format: 'PNG', size: '2.8 MB', type: 'Icons', mime: 'image/png' },
-    { title: 'Identity Guidelines', format: 'PDF', size: '1.4 MB', type: 'Media', mime: 'application/pdf' },
-    { title: 'SOC_Banners_V1', format: 'JPG', size: '4.2 MB', type: 'Graphics', mime: 'image/jpeg' },
+    { id: 'svg_pack', title: 'Vector Logo Pack', format: 'SVG', size: '14.8 KB', type: 'Master Vector', mime: 'image/svg+xml' },
+    { id: 'png_ui', title: 'Raster UI Assets', format: 'PNG', size: '3.4 MB', type: 'Ultra-HD 4K', mime: 'image/png' },
+    { id: 'pdf_guide', title: 'Identity Guidelines', format: 'PDF', size: '1.8 MB', type: 'Brand Manual', mime: 'text/markdown' },
+    { id: 'jpg_soc', title: 'SOC_Banners_V1', format: 'JPG', size: '5.6 MB', type: '4K Wallpaper', mime: 'image/jpeg' },
 ];
+
+// High-precision SVG Generator
+const generateMasterSVG = (): string => {
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 600" width="1600" height="600">
+  <defs>
+    <linearGradient id="pgTopGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#9B66FF"/>
+      <stop offset="100%" stop-color="#7B3FE4"/>
+    </linearGradient>
+    <linearGradient id="pgBotGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#7B3FE4"/>
+      <stop offset="100%" stop-color="#C084FC"/>
+    </linearGradient>
+    <filter id="purpleGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="24" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Dark Background Canvas -->
+  <rect width="1600" height="600" fill="#020202" rx="20"/>
+
+  <!-- Subtly Textured Grid Lines -->
+  <g stroke="#ffffff" stroke-opacity="0.04" stroke-width="1">
+    <path d="M0 150 H1600 M0 300 H1600 M0 450 H1600"/>
+    <path d="M400 0 V600 M800 0 V600 M1200 0 V600"/>
+  </g>
+
+  <!-- Master PolyGuard Emblem -->
+  <g transform="translate(240, 300)">
+    <!-- Outer Ambient Glow Ring -->
+    <circle r="220" fill="#7B3FE4" fill-opacity="0.12" filter="url(#purpleGlow)"/>
+
+    <!-- Outer Hexagon Shield Path -->
+    <path d="M0 -180 L155 -90 V90 L0 180 L-155 90 V-90 Z" fill="none" stroke="#FFFFFF" stroke-opacity="0.18" stroke-width="6"/>
+
+    <!-- Top Diamond Stack -->
+    <path d="M0 -110 L100 -50 L0 10 L-100 -50 Z" fill="url(#pgTopGrad)"/>
+
+    <!-- Bottom Diamond Stack -->
+    <path d="M0 -5 L100 55 L0 115 L-100 55 Z" fill="url(#pgBotGrad)" opacity="0.9"/>
+  </g>
+
+  <!-- Master Typography Lockup -->
+  <g transform="translate(490, 335)">
+    <text font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="140" letter-spacing="-4">
+      <tspan fill="#FFFFFF">POLY</tspan>
+      <tspan fill="#C084FC">GUARD</tspan>
+    </text>
+    <text y="55" font-family="'JetBrains Mono', monospace" font-size="24" font-weight="700" fill="#8E8EA0" letter-spacing="10">
+      INSTITUTIONAL AGGLAYER SECURITY KERNEL
+    </text>
+    <text y="90" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="600" fill="#7B3FE4" letter-spacing="6">
+      VERIFIED // ZERO-KNOWLEDGE DEFENSE MATRIX v4.2.0
+    </text>
+  </g>
+</svg>`.trim();
+};
+
+// High-precision PNG Canvas Generator
+const generatePNGBlob = (variant: 'dark' | 'transparent' | 'light' = 'dark'): Promise<Blob> => {
+    return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 2400;
+        canvas.height = 1200;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        if (variant === 'dark') {
+            ctx.fillStyle = '#020202';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Subtle tech grid
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+            ctx.lineWidth = 2;
+            for (let x = 0; x < canvas.width; x += 120) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += 120) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+            }
+        } else if (variant === 'light') {
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        } else {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        const cx = 380;
+        const cy = 600;
+        const size = 320;
+
+        // Radial Ambient Glow
+        if (variant !== 'light') {
+            const glow = ctx.createRadialGradient(cx, cy, 20, cx, cy, 450);
+            glow.addColorStop(0, 'rgba(123, 63, 228, 0.45)');
+            glow.addColorStop(0.5, 'rgba(123, 63, 228, 0.15)');
+            glow.addColorStop(1, 'rgba(123, 63, 228, 0)');
+            ctx.fillStyle = glow;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 450, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Outer Hex Shield
+        ctx.beginPath();
+        const r = size * 0.9;
+        for (let i = 0; i < 6; i++) {
+            const angle = (Math.PI / 3) * i - Math.PI / 2;
+            const x = cx + r * Math.cos(angle);
+            const y = cy + r * Math.sin(angle);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.strokeStyle = variant === 'light' ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.2)';
+        ctx.lineWidth = 8;
+        ctx.stroke();
+
+        // Top Diamond
+        const topGrad = ctx.createLinearGradient(cx, cy - size * 0.6, cx, cy + size * 0.1);
+        topGrad.addColorStop(0, '#9B66FF');
+        topGrad.addColorStop(1, '#7B3FE4');
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - size * 0.58);
+        ctx.lineTo(cx + size * 0.5, cy - size * 0.28);
+        ctx.lineTo(cx, cy + size * 0.03);
+        ctx.lineTo(cx - size * 0.5, cy - size * 0.28);
+        ctx.closePath();
+        ctx.fillStyle = topGrad;
+        ctx.fill();
+
+        // Bottom Diamond
+        const botGrad = ctx.createLinearGradient(cx, cy - size * 0.03, cx, cy + size * 0.6);
+        botGrad.addColorStop(0, '#7B3FE4');
+        botGrad.addColorStop(1, variant === 'light' ? '#6B21A8' : '#C084FC');
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - size * 0.03);
+        ctx.lineTo(cx + size * 0.5, cy + size * 0.28);
+        ctx.lineTo(cx, cy + size * 0.58);
+        ctx.lineTo(cx - size * 0.5, cy + size * 0.28);
+        ctx.closePath();
+        ctx.fillStyle = botGrad;
+        ctx.globalAlpha = 0.9;
+        ctx.fill();
+        ctx.globalAlpha = 1.0;
+
+        // Typography: POLYGUARD
+        ctx.fillStyle = variant === 'light' ? '#0A0A0A' : '#FFFFFF';
+        ctx.font = '900 210px Inter, system-ui, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        
+        const textX = 800;
+        const textY = 560;
+        ctx.fillText('POLY', textX, textY);
+
+        const polyWidth = ctx.measureText('POLY').width;
+        ctx.fillStyle = '#C084FC';
+        ctx.fillText('GUARD', textX + polyWidth, textY);
+
+        // Subtitles
+        ctx.fillStyle = variant === 'light' ? '#4B5563' : '#9CA3AF';
+        ctx.font = '700 38px "JetBrains Mono", monospace';
+        ctx.fillText('INSTITUTIONAL AGGLAYER DEFENSE KERNEL', textX, textY + 130);
+
+        ctx.fillStyle = '#7B3FE4';
+        ctx.font = '600 24px "JetBrains Mono", monospace';
+        ctx.fillText('VERIFIED // ZERO-KNOWLEDGE DEFENSE MATRIX v4.2.0', textX, textY + 190);
+
+        canvas.toBlob((blob) => {
+            if (blob) resolve(blob);
+        }, 'image/png');
+    });
+};
+
+// 4K SOC Wallpaper Generator
+const generateSOCWallpaperJPG = (): Promise<Blob> => {
+    return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 3840;
+        canvas.height = 2160;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        // Deep Cyber Canvas
+        ctx.fillStyle = '#020202';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Cyber Grid Lines
+        ctx.strokeStyle = 'rgba(123, 63, 228, 0.06)';
+        ctx.lineWidth = 2;
+        for (let x = 0; x < canvas.width; x += 160) {
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+        }
+        for (let y = 0; y < canvas.height; y += 160) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+        }
+
+        // Central Radial Ambient Glow
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2 - 100;
+        const radGlow = ctx.createRadialGradient(cx, cy, 50, cx, cy, 900);
+        radGlow.addColorStop(0, 'rgba(123, 63, 228, 0.35)');
+        radGlow.addColorStop(0.5, 'rgba(123, 63, 228, 0.08)');
+        radGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = radGlow;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 900, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Hexagon Shield Emblem
+        const size = 360;
+        ctx.beginPath();
+        const r = size * 0.9;
+        for (let i = 0; i < 6; i++) {
+            const angle = (Math.PI / 3) * i - Math.PI / 2;
+            const x = cx + r * Math.cos(angle);
+            const y = cy + r * Math.sin(angle);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+        ctx.lineWidth = 8;
+        ctx.stroke();
+
+        // Top Diamond
+        const topGrad = ctx.createLinearGradient(cx, cy - size * 0.6, cx, cy + size * 0.1);
+        topGrad.addColorStop(0, '#9B66FF');
+        topGrad.addColorStop(1, '#7B3FE4');
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - size * 0.58);
+        ctx.lineTo(cx + size * 0.5, cy - size * 0.28);
+        ctx.lineTo(cx, cy + size * 0.03);
+        ctx.lineTo(cx - size * 0.5, cy - size * 0.28);
+        ctx.closePath();
+        ctx.fillStyle = topGrad;
+        ctx.fill();
+
+        // Bottom Diamond
+        const botGrad = ctx.createLinearGradient(cx, cy - size * 0.03, cx, cy + size * 0.6);
+        botGrad.addColorStop(0, '#7B3FE4');
+        botGrad.addColorStop(1, '#C084FC');
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - size * 0.03);
+        ctx.lineTo(cx + size * 0.5, cy + size * 0.28);
+        ctx.lineTo(cx, cy + size * 0.58);
+        ctx.lineTo(cx - size * 0.5, cy + size * 0.28);
+        ctx.closePath();
+        ctx.fillStyle = botGrad;
+        ctx.fill();
+
+        // Main Title
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = '900 180px Inter, system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('POLYGUARD', cx, cy + 420);
+
+        ctx.fillStyle = '#A855F7';
+        ctx.font = '700 48px "JetBrains Mono", monospace';
+        ctx.fillText('INSTITUTIONAL AI & ZERO-KNOWLEDGE DEFENSE MATRIX', cx, cy + 520);
+
+        ctx.fillStyle = '#6B7280';
+        ctx.font = '600 32px "JetBrains Mono", monospace';
+        ctx.fillText('POLYGON AGGLAYER // PESSIMISTIC PROVER // DEFCON NOMINAL', cx, cy + 590);
+
+        canvas.toBlob((blob) => {
+            if (blob) resolve(blob);
+        }, 'image/jpeg', 0.96);
+    });
+};
+
+const generateIdentityGuidelinesDoc = (): string => {
+    return `# PolyGuard Brand Identity Protocol & Visual Design System
+
+**Official Institutional Brand Guidelines**  
+**Version:** 4.2.0-STABLE  
+**Release:** Q1 2026  
+**Classification:** Public / Brand Operations  
+
+---
+
+## 1. Brand Philosophy & Core Identity
+
+PolyGuard represents the apex of **Zero-Knowledge Cryptography** and **Institutional Artificial Intelligence** for the Polygon AggLayer ecosystem.
+
+The visual identity combines industrial military precision with cryptographic transparency.
+
+---
+
+## 2. Master Color Palette Specifications
+
+| Color Name | Hex Code | RGB Value | Usage Role |
+| :--- | :--- | :--- | :--- |
+| **Polygon Purple** | \`#7B3FE4\` | \`rgb(123, 63, 228)\` | Primary Brand Color, Core Accents & Glows |
+| **Purple Light** | \`#C084FC\` | \`rgb(192, 132, 252)\` | Logotype Text Highlights & Callouts |
+| **Pure Dark** | \`#020202\` | \`rgb(2, 2, 2)\` | Primary Screen Canvas & UI Backgrounds |
+| **Institutional Gray** | \`#EAEAEA\` | \`rgb(234, 234, 234)\` | Primary Display & Body Typography |
+| **Cyber Blue** | \`#3B82F6\` | \`rgb(59, 130, 246)\` | Interactive State Signals & RPC Indicators |
+| **Defcon Red** | \`#EF4444\` | \`rgb(239, 68, 68)\` | Critical Threat States & Reentrancy Alerts |
+
+---
+
+## 3. Typographic Hierarchy & Fonts
+
+1. **Primary Sans (Display & Body):** \`Inter\` (Weights: 900 Black, 700 Bold, 400 Regular)
+2. **Secondary Monospace (Code & Telemetry):** \`JetBrains Mono\` (Weights: 700 Bold, 500 Medium)
+
+---
+
+## 4. Logo Clear Space & Minimum Scale
+
+- **Minimum Clear Space:** Equal to 50% of the emblem width on all four sides.
+- **Minimum Digital Size:** 24px height for icon emblem; 120px width for full horizontal logotype.
+
+---
+
+*Copyright © 2026 PolyGuard Security Infrastructure Inc. All Rights Reserved.*
+`;
+};
 
 const BrandKitView: React.FC = () => {
     const [downloadingStates, setDownloadingStates] = useState<Record<number, 'idle' | 'preparing' | 'downloading' | 'complete'>>({});
@@ -31,47 +355,27 @@ const BrandKitView: React.FC = () => {
         setTimeout(() => setCopiedColor(null), 2000);
     };
 
-    const triggerFileDownload = (index: number) => {
+    const triggerFileDownload = async (index: number) => {
         const asset = ASSETS[index];
         let blob: Blob;
 
-        if (asset.format === 'SVG') {
-            const svgContent = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
-    <rect width="500" height="500" fill="#020202"/>
-    <path d="M250 50 L450 150 V350 L250 450 L50 350 V150 L250 50Z" fill="none" stroke="#7b3fe4" stroke-width="20" stroke-linejoin="round"/>
-    <path d="M250 120 L370 200 L250 280 L130 200 Z" fill="#7b3fe4"/>
-    <path d="M250 280 L370 360 L250 440 L130 360 Z" fill="#7b3fe4" opacity="0.7"/>
-    <text x="250" y="480" font-family="Arial, sans-serif" font-size="24" fill="#ffffff" text-anchor="middle" font-weight="bold" letter-spacing="10">POLYGUARD DEFENSE</text>
-</svg>`.trim();
+        if (asset.id === 'svg_pack') {
+            const svgContent = generateMasterSVG();
             blob = new Blob([svgContent], { type: 'image/svg+xml' });
-        } else if (asset.format === 'PNG' || asset.format === 'JPG') {
-            const base64Pixel = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
-            const byteCharacters = atob(base64Pixel);
-            const byteNumbers = new Array(byteCharacters.length);
-            for (let i = 0; i < byteCharacters.length; i++) {
-                byteNumbers[i] = byteCharacters.charCodeAt(i);
-            }
-            const byteArray = new Uint8Array(byteNumbers);
-            blob = new Blob([byteArray], { type: asset.mime });
+        } else if (asset.id === 'png_ui') {
+            blob = await generatePNGBlob('dark');
+        } else if (asset.id === 'jpg_soc') {
+            blob = await generateSOCWallpaperJPG();
         } else {
-            const docContent = `
-[SYSTEM_DOCUMENTATION_HEADER]
-VERSION: 3.2.0-PRO
-AUTH_LEVEL: INSTITUTIONAL
-ENCRYPTION: AES-256-GCM
---------------------------------------------------
-PROJECT: POLYGUARD SECURITY AGENT
-MODULE: BRAND_IDENTITY_PROTOCOL
-TIMESTAMP: ${new Date().toISOString()}
-`.trim();
-            blob = new Blob([docContent], { type: 'text/plain' });
+            const docContent = generateIdentityGuidelinesDoc();
+            blob = new Blob([docContent], { type: 'text/markdown' });
         }
-        
+
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        const fileName = `${asset.title.toLowerCase().replace(/\s+/g, '_')}_v3.${asset.format.toLowerCase()}`;
+        const extension = asset.id === 'pdf_guide' ? 'md' : asset.format.toLowerCase();
+        const fileName = `PolyGuard_${asset.title.replace(/\s+/g, '_')}_v4.${extension}`;
         link.download = fileName;
         document.body.appendChild(link);
         link.click();
@@ -83,16 +387,35 @@ TIMESTAMP: ${new Date().toISOString()}
         if (downloadingStates[index] && downloadingStates[index] !== 'idle' && downloadingStates[index] !== 'complete') return;
 
         setDownloadingStates(prev => ({ ...prev, [index]: 'preparing' }));
-        await new Promise(r => setTimeout(r, 800));
+        await new Promise(r => setTimeout(r, 600));
         setDownloadingStates(prev => ({ ...prev, [index]: 'downloading' }));
-        await new Promise(r => setTimeout(r, 1800));
-        
-        triggerFileDownload(index);
+        await new Promise(r => setTimeout(r, 1200));
+
+        await triggerFileDownload(index);
         setDownloadingStates(prev => ({ ...prev, [index]: 'complete' }));
 
         setTimeout(() => {
             setDownloadingStates(prev => ({ ...prev, [index]: 'idle' }));
         }, 3000);
+    };
+
+    const downloadContextLogo = async (context: 'dark' | 'light' | 'primary', format: 'png' | 'svg') => {
+        let blob: Blob;
+        let ext = format;
+        if (format === 'svg') {
+            blob = new Blob([generateMasterSVG()], { type: 'image/svg+xml' });
+        } else {
+            blob = await generatePNGBlob(context === 'light' ? 'light' : 'dark');
+        }
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `PolyGuard_Logo_${context.toUpperCase()}.${ext}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     };
 
     return (
@@ -104,13 +427,13 @@ TIMESTAMP: ${new Date().toISOString()}
                     </div>
                     <div>
                         <h1 className="text-3xl font-black uppercase tracking-tight text-white leading-none">Identity Protocol</h1>
-                        <p className="text-[10px] text-gray-500 font-mono mt-1 uppercase tracking-widest">System_Specs // Asset_Repository // Version_3.2</p>
+                        <p className="text-[10px] text-gray-500 font-mono mt-1 uppercase tracking-widest">System_Specs // Asset_Repository // Version_4.2.0</p>
                     </div>
                 </div>
                 <div className="hidden lg:flex gap-4">
                     <div className="text-right">
                         <div className="text-[8px] font-mono text-gray-600 uppercase font-black">Release</div>
-                        <div className="text-xs font-mono font-bold text-white uppercase">Q2_2025_DEPLOY</div>
+                        <div className="text-xs font-mono font-bold text-white uppercase">Q1_2026_DEPLOY</div>
                     </div>
                     <div className="w-px h-8 bg-white/10"></div>
                     <div className="text-right">
@@ -122,25 +445,71 @@ TIMESTAMP: ${new Date().toISOString()}
 
             {/* Logo Previews Contexts */}
             <section className="mb-20">
-                <div className="flex items-center gap-2 mb-8">
-                    <div className="w-1 h-4 bg-polygon-purple"></div>
-                    <h2 className="text-[11px] font-mono font-black text-white uppercase tracking-[0.4em]">Logotype_Matrix</h2>
+                <div className="flex items-center justify-between mb-8">
+                    <div className="flex items-center gap-2">
+                        <div className="w-1 h-4 bg-polygon-purple"></div>
+                        <h2 className="text-[11px] font-mono font-black text-white uppercase tracking-[0.4em]">Logotype_Matrix</h2>
+                    </div>
+                    <span className="text-[9px] font-mono text-gray-500 uppercase">Click below card to download vector & raster assets</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <Card className="p-16 flex items-center justify-center bg-[#020202] border-white/10 relative overflow-hidden group">
+                    <Card className="p-16 flex flex-col items-center justify-center bg-[#020202] border-white/10 relative overflow-hidden group">
                         <div className="absolute inset-0 tech-bg opacity-[0.03]"></div>
-                        <CyberpunkLogo className="scale-150 relative z-10" />
+                        <CyberpunkLogo className="scale-150 relative z-10 mb-8" />
                         <div className="absolute bottom-4 left-4 text-[7px] font-mono text-gray-700 uppercase font-black">Context: Dark_Uplink</div>
+                        <div className="flex gap-2 relative z-20 mt-4">
+                            <Button 
+                                variant="secondary" 
+                                className="text-[8px] py-1.5 px-3 border-white/10"
+                                onClick={() => downloadContextLogo('dark', 'svg')}
+                            >
+                                <DownloadIcon className="w-3 h-3 mr-1" /> SVG
+                            </Button>
+                            <Button 
+                                variant="secondary" 
+                                className="text-[8px] py-1.5 px-3 border-white/10"
+                                onClick={() => downloadContextLogo('dark', 'png')}
+                            >
+                                <DownloadIcon className="w-3 h-3 mr-1" /> Ultra-HD PNG
+                            </Button>
+                        </div>
                     </Card>
-                    <Card className="p-16 flex items-center justify-center bg-white border-transparent group">
-                        <CyberpunkLogo className="scale-150 brightness-0" />
+
+                    <Card className="p-16 flex flex-col items-center justify-center bg-white border-transparent group relative">
+                        <CyberpunkLogo className="scale-150 brightness-0 mb-8" />
                         <div className="absolute bottom-4 left-4 text-[7px] font-mono text-gray-400 uppercase font-black">Context: Document_Print</div>
+                        <div className="flex gap-2 relative z-20 mt-4">
+                            <Button 
+                                variant="secondary" 
+                                className="text-[8px] py-1.5 px-3 !bg-gray-100 !text-black !border-gray-300 hover:!bg-black hover:!text-white"
+                                onClick={() => downloadContextLogo('light', 'svg')}
+                            >
+                                <DownloadIcon className="w-3 h-3 mr-1" /> SVG
+                            </Button>
+                            <Button 
+                                variant="secondary" 
+                                className="text-[8px] py-1.5 px-3 !bg-gray-100 !text-black !border-gray-300 hover:!bg-black hover:!text-white"
+                                onClick={() => downloadContextLogo('light', 'png')}
+                            >
+                                <DownloadIcon className="w-3 h-3 mr-1" /> PNG
+                            </Button>
+                        </div>
                     </Card>
-                    <Card className="p-16 flex items-center justify-center bg-polygon-purple border-transparent group overflow-hidden">
+
+                    <Card className="p-16 flex flex-col items-center justify-center bg-polygon-purple border-transparent group overflow-hidden relative">
                         <div className="absolute inset-0 bg-black/10"></div>
                         <CyberpunkLogo hideText className="scale-[3.5] opacity-20 absolute -right-4 -bottom-4" />
-                        <CyberpunkLogo hideText className="scale-[2.5] brightness-200" />
+                        <CyberpunkLogo hideText className="scale-[2.5] brightness-200 mb-8 relative z-10" />
                         <div className="absolute bottom-4 left-4 text-[7px] font-mono text-purple-200 uppercase font-black">Context: Brand_Primary</div>
+                        <div className="flex gap-2 relative z-20 mt-4">
+                            <Button 
+                                variant="secondary" 
+                                className="text-[8px] py-1.5 px-3 !bg-black/40 !text-white border-white/20 hover:!bg-white hover:!text-black"
+                                onClick={() => downloadContextLogo('primary', 'png')}
+                            >
+                                <DownloadIcon className="w-3 h-3 mr-1" /> Emblem PNG
+                            </Button>
+                        </div>
                     </Card>
                 </div>
             </section>
@@ -422,10 +791,10 @@ TIMESTAMP: ${new Date().toISOString()}
                                         <span className="flex items-center gap-2"><RefreshIcon className="w-3.5 h-3.5" /> REQUISITION</span>
                                     )}
                                     {state === 'preparing' && (
-                                        <span className="flex items-center gap-2"><RefreshIcon className="w-3.5 h-3.5 animate-spin" /> LINKING...</span>
+                                        <span className="flex items-center gap-2"><RefreshIcon className="w-3.5 h-3.5 animate-spin" /> GENERATING...</span>
                                     )}
                                     {state === 'downloading' && (
-                                        <span className="flex items-center gap-2"><ZapIcon className="w-3.5 h-3.5 animate-pulse" /> INGESTING</span>
+                                        <span className="flex items-center gap-2"><ZapIcon className="w-3.5 h-3.5 animate-pulse" /> ENCODING</span>
                                     )}
                                     {state === 'complete' && (
                                         <span className="flex items-center gap-2"><CheckCircleIcon className="w-3.5 h-3.5" /> DELIVERED</span>
