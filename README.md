@@ -1,4 +1,5 @@
-# 🛡️ PolyGuard: Institutional AI & Zero-Knowledge Security Infrastructure for Polygon AggLayer
+# 🛡️ PolyGuard 
+Institutional AI & Zero-Knowledge Security Infrastructure for Polygon AggLayer
 
 <p align="center">
   <a href="https://polyguard.ai.studio" target="_blank">
