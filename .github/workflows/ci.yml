@@ -58,8 +58,13 @@ jobs:
           python -m pip install --upgrade pip setuptools
           if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
 
-      - name: Install quick security tools (non-blocking)
+      - name: Install system deps for Slither/Mythril (non-blocking)
         run: |
+          set -e
+          echo "Installing system packages required by security tools (best-effort)"
+          sudo apt-get update -y
+          sudo apt-get install -y solc clang build-essential pkg-config libssl-dev llvm lld npm || true
+          python -m pip install --upgrade pip setuptools
           python -m pip install slither-analyzer mythril safety || true
 
       - name: Verify installed tools
@@ -70,6 +75,14 @@ jobs:
           slither --version || echo "slither not available"
           echo "=== Mythril version (if available) ==="
           myth --version || echo "mythril not available"
+
+      - name: Install pytest and test deps
+        run: |
+          python -m pip install pytest pytest-asyncio httpx
+
+      - name: Run Python smoke tests (pytest)
+        run: |
+          pytest -q backend/tests/test_health.py -q --maxfail=1
 
   rust-build:
     name: Rust build for core crates
