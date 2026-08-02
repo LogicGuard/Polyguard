@@ -1,0 +1,8 @@
+[package]
+name = "polyguard-core-engine"
+version = "0.1.0"
+edition = "2021"
+description = "PolyGuard Core Verification Engine"
+license = "MIT"
+
+[dependencies]

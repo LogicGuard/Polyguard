@@ -1,0 +1,10 @@
+[package]
+name = "polyguard-rpc-proxy"
+version = "0.1.0"
+edition = "2021"
+description = "PolyGuard RPC Proxy with MEV protection"
+license = "MIT"
+
+[dependencies]
+tokio = { version = "1.0", features = ["full"] }
+hyper = "1.0"
