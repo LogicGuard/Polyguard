@@ -1,7 +1,9 @@
 import logging
+import os
 from fastapi import FastAPI, Request, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
+from app.core.config_validator import ConfigValidator
 from app.core.database import init_db
 from app.core.rate_limiter import rate_limiter
 from app.api.v1.router import api_router
@@ -11,6 +13,15 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger("polyguard.backend")
+
+# Validate required configs at startup
+try:
+    environment = os.getenv("ENVIRONMENT", "development")
+    ConfigValidator.validate(environment)
+    logger.info(f"Config validation passed for {environment} environment.")
+except ValueError as e:
+    logger.error(f"Config validation failed: {e}")
+    raise
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
