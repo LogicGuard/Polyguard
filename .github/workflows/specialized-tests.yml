@@ -23,23 +23,37 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Build security CI image
+      - name: Pull security CI image from GHCR
         run: |
-          docker build -f .github/ci/security-ci.Dockerfile -t polyguard/security-ci:latest .
+          set -e
+          echo "Attempting to pull CI image from GHCR"
+          docker pull ghcr.io/${{ github.repository_owner }}/polyguard/security-ci:latest || true
 
-      - name: Run specialized test runner inside CI image
+      - name: Run specialized test runner inside CI image (GHCR)
         run: |
-          docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace polyguard/security-ci:latest /bin/bash -c "chmod +x ./scripts/run_specialized_tests.sh && ./scripts/run_specialized_tests.sh"
+          if docker image inspect ghcr.io/${{ github.repository_owner }}/polyguard/security-ci:latest > /dev/null 2>&1; then
+            echo "Running inside GHCR image"
+            docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace ghcr.io/${{ github.repository_owner }}/polyguard/security-ci:latest /bin/bash -c "chmod +x ./scripts/run_specialized_tests.sh && ./scripts/run_specialized_tests.sh"
+          else
+            echo "GHCR image not available, building locally as fallback"
+            docker build -f .github/ci/security-ci.Dockerfile -t polyguard/security-ci:latest .
+            docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace polyguard/security-ci:latest /bin/bash -c "chmod +x ./scripts/run_specialized_tests.sh && ./scripts/run_specialized_tests.sh"
+          fi
 
       - name: Make runner script executable
         run: |
           chmod +x ./scripts/run_specialized_tests.sh
 
-      - name: Run specialized test runner (fallback on host)
-        if: failure()
+      - name: Upload results artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: specialized-test-results
+          path: SPECIALIZED_TEST_RESULTS.md
+
+      - name: Show short preview
         run: |
-          echo "Container run failed, falling back to host execution (best-effort)"
-          ./scripts/run_specialized_tests.sh
+          echo "--- HEAD of results ---"
+          head -n 80 SPECIALIZED_TEST_RESULTS.md || true
 
       - name: Upload results artifact
         uses: actions/upload-artifact@v4
