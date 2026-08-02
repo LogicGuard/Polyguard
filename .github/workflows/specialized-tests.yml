@@ -23,17 +23,22 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install system deps (best-effort)
+      - name: Build security CI image
         run: |
-          sudo apt-get update -y
-          sudo apt-get install -y solc clang build-essential pkg-config libssl-dev llvm lld npm jq || true
+          docker build -f .github/ci/security-ci.Dockerfile -t polyguard/security-ci:latest .
+
+      - name: Run specialized test runner inside CI image
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace polyguard/security-ci:latest /bin/bash -c "chmod +x ./scripts/run_specialized_tests.sh && ./scripts/run_specialized_tests.sh"
 
       - name: Make runner script executable
         run: |
           chmod +x ./scripts/run_specialized_tests.sh
 
-      - name: Run specialized test runner
+      - name: Run specialized test runner (fallback on host)
+        if: failure()
         run: |
+          echo "Container run failed, falling back to host execution (best-effort)"
           ./scripts/run_specialized_tests.sh
 
       - name: Upload results artifact
