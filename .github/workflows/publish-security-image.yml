@@ -34,5 +34,5 @@ jobs:
           context: .
           file: .github/ci/security-ci.Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/polyguard/security-ci:latest,ghcr.io/${{ github.repository_owner }}/polyguard/security-ci:${{ github.sha }}
+          tags: ghcr.io/${{ toLower(github.repository_owner) }}/polyguard/security-ci:latest,ghcr.io/${{ toLower(github.repository_owner) }}/polyguard/security-ci:${{ github.sha }}
           platforms: linux/amd64,linux/arm64
