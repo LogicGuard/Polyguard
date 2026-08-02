@@ -9,6 +9,10 @@ Institutional AI & Zero-Knowledge Security Infrastructure for Polygon AggLayer
   <img src="https://img.shields.io/badge/Google_Gemini-3.6_Flash_/_1.5_Pro-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Gemini AI" />
   <img src="https://img.shields.io/badge/ZK--SNARKs-Groth16_/_Plonky2-000000?style=for-the-badge&logo=gnubash&logoColor=white" alt="ZK Proofs" />
   <img src="https://img.shields.io/badge/Security_Score-99.8%25_Nominal-00E676?style=for-the-badge" alt="Security Rating" />
+  <!-- CI and Coverage badges -->
+  <img src="https://github.com/LogicGuard/Polyguard/actions/workflows/node-ci.yml/badge.svg" alt="Node CI" />
+  <img src="https://github.com/LogicGuard/Polyguard/actions/workflows/python-ci.yml/badge.svg" alt="Python CI" />
+  <img src="https://img.shields.io/badge/Codecov-coverage-blue" alt="Codecov" />
   <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="License" />
 </p>
 
