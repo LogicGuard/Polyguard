@@ -2,7 +2,7 @@
 
 **Mathematical & Cryptographic Foundation**  
 **Version:** 4.2.0-STABLE  
-**Target Standard:** Polygon AggLayer LxLy Bridge, Circom 2.1, Plonky2/Plonky3 SNARKs  
+**Target Standard:** Polygon AggLayer LxLy Bridge, Circom 2.1, Plonky2/Plonky3 SNARKs
 
 ---
 
@@ -10,7 +10,7 @@
 
 The Polygon AggLayer links independent ZK rollups and CDK appchains to a single unified bridge contract (`PolygonRollupManager.sol`). In a multi-chain environment, a single compromised or bug-ridden rollup could theoretically generate fraudulent exit proofs to drain shared L1 bridge liquidity.
 
-The **Pessimistic Prover** operates under the cryptographic premise that *every rollup is untrusted until mathematically proven otherwise*. It mandates that no rollup can finalize a withdrawal exceeding its historical deposit balance.
+The **Pessimistic Prover** operates under the cryptographic premise that _every rollup is untrusted until mathematically proven otherwise_. It mandates that no rollup can finalize a withdrawal exceeding its historical deposit balance.
 
 ---
 
@@ -105,4 +105,4 @@ template PolyGuardPessimisticInvariant(levels) {
 
 ---
 
-*Copyright © 2026 PolyGuard Security Infrastructure Inc. All Rights Reserved.*
+_Copyright © 2026 PolyGuard Security Infrastructure Inc. All Rights Reserved._

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion, useScroll, useSpring } from 'framer-motion';
 
@@ -20,94 +19,87 @@ import LiveAuditDemo from './landing/LiveAuditDemo';
 import CTASection from './landing/CTASection';
 
 interface LandingPageProps {
-    onEnterApp: () => void;
+  onEnterApp: () => void;
 }
 
 const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp }) => {
-    const [isAuthOpen, setIsAuthOpen] = useState(false);
-    const [isContactOpen, setIsContactOpen] = useState(false);
-    const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isContactOpen, setIsContactOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
 
-    const { scrollYProgress } = useScroll();
-    const scaleX = useSpring(scrollYProgress, {
-        stiffness: 100,
-        damping: 30,
-        restDelta: 0.001
-    });
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001,
+  });
 
-    const openAuth = (mode: 'login' | 'signup') => {
-        setAuthMode(mode);
-        setIsAuthOpen(true);
-    };
+  const openAuth = (mode: 'login' | 'signup') => {
+    setAuthMode(mode);
+    setIsAuthOpen(true);
+  };
 
-    const handleAuthSuccess = () => {
-        setIsAuthOpen(false);
-        onEnterApp();
-    };
+  const handleAuthSuccess = () => {
+    setIsAuthOpen(false);
+    onEnterApp();
+  };
 
-    return (
-        <div className="min-h-screen bg-[#030303] text-[#EAEAEA] font-sans selection:bg-blue-500/30 selection:text-white overflow-x-hidden">
-            
-            {/* Global Overlays */}
-            <div className="grain-overlay"></div>
-            
-            {/* Refined Scroll Progress Bar - Highest Z-Index and Brand Colors */}
-            <motion.div
-                className="fixed top-0 left-0 right-0 h-[3px] bg-polygon-purple origin-left z-[2000] shadow-[0_0_15px_rgba(123,63,228,0.8)]"
-                style={{ scaleX }}
-            />
+  return (
+    <div className="min-h-screen bg-[#030303] text-[#EAEAEA] font-sans selection:bg-blue-500/30 selection:text-white overflow-x-hidden">
+      {/* Global Overlays */}
+      <div className="grain-overlay"></div>
 
-            {/* Modals */}
-            <AuthModal 
-                isOpen={isAuthOpen} 
-                onClose={() => setIsAuthOpen(false)} 
-                initialMode={authMode}
-                onSuccess={handleAuthSuccess}
-            />
-            <ContactModal 
-                isOpen={isContactOpen}
-                onClose={() => setIsContactOpen(false)}
-            />
+      {/* Refined Scroll Progress Bar - Highest Z-Index and Brand Colors */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-[3px] bg-polygon-purple origin-left z-[2000] shadow-[0_0_15px_rgba(123,63,228,0.8)]"
+        style={{ scaleX }}
+      />
 
-            {/* Expert Navbar & Ticker Container */}
-            <div className="relative z-[110]">
-              <LandingNavbar 
-                  onOpenAuth={openAuth} 
-                  onOpenContact={() => setIsContactOpen(true)} 
-              />
-              <div className="h-16 md:h-24"></div> 
-              <SecurityTicker />
-            </div>
+      {/* Modals */}
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        initialMode={authMode}
+        onSuccess={handleAuthSuccess}
+      />
+      <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
 
-            {/* Overhauled Sections */}
-            <HeroSection onStart={() => openAuth('signup')} />
-            
-            <TrustedBy />
+      {/* Expert Navbar & Ticker Container */}
+      <div className="relative z-[110]">
+        <LandingNavbar onOpenAuth={openAuth} onOpenContact={() => setIsContactOpen(true)} />
+        <div className="h-16 md:h-24"></div>
+        <SecurityTicker />
+      </div>
 
-            <StatsGrid />
+      {/* Overhauled Sections */}
+      <HeroSection onStart={() => openAuth('signup')} />
 
-            <div id="platform">
-                <FeatureShowcase />
-            </div>
+      <TrustedBy />
 
-            <LiveAuditDemo />
+      <StatsGrid />
 
-            <HowItWorks />
+      <div id="platform">
+        <FeatureShowcase />
+      </div>
 
-            <Testimonials />
+      <LiveAuditDemo />
 
-            <PricingSection 
-                onSelect={() => openAuth('signup')} 
-                onContact={() => setIsContactOpen(true)}
-            />
+      <HowItWorks />
 
-            <FAQ />
+      <Testimonials />
 
-            <CTASection onStart={() => openAuth('signup')} />
+      <PricingSection
+        onSelect={() => openAuth('signup')}
+        onContact={() => setIsContactOpen(true)}
+      />
 
-            <Footer />
-        </div>
-    );
+      <FAQ />
+
+      <CTASection onStart={() => openAuth('signup')} />
+
+      <Footer />
+    </div>
+  );
 };
 
 export default LandingPage;

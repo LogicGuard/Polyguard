@@ -1,4 +1,5 @@
-# 🛡️ PolyGuard 
+# 🛡️ PolyGuard
+
 Institutional AI & Zero-Knowledge Security Infrastructure for Polygon AggLayer
 
 <p align="center">
@@ -17,11 +18,11 @@ Institutional AI & Zero-Knowledge Security Infrastructure for Polygon AggLayer
 </p>
 
 ```
-  ____   ____  _     __    ____ _   _    _    ____  ____  
- |  _ \ / __ \| |    \ \ / / ___| | | |  / \  |  _ \|  _ \ 
+  ____   ____  _     __    ____ _   _    _    ____  ____
+ |  _ \ / __ \| |    \ \ / / ___| | | |  / \  |  _ \|  _ \
  | |_) | |  | | |     \ V / |  _| | | | / _ \ | |_) | | | |
  |  __/| |__| | |___   | || |_| | |_| |/ ___ \|  _ <| |_| |
- |_|    \____/|_____|  |_| \____|\___//_/   \_\_| \_\____/ 
+ |_|    \____/|_____|  |_| \____|\___//_/   \_\_| \_\____/
    UNIFIED REAL-TIME SECURITY ENGINE FOR THE POLYGON AGGLAYER
 ```
 
@@ -32,9 +33,10 @@ Institutional AI & Zero-Knowledge Security Infrastructure for Polygon AggLayer
 
 ## 📌 Executive Overview
 
-**PolyGuard** is an enterprise-grade, real-time security matrix and multi-agent AI defense engine specifically engineered for the **Polygon AggLayer** unified liquidity ecosystem. 
+**PolyGuard** is an enterprise-grade, real-time security matrix and multi-agent AI defense engine specifically engineered for the **Polygon AggLayer** unified liquidity ecosystem.
 
 As Web3 scales to multi-chain zero-knowledge rollup architectures, cross-chain bridges remain the single largest vector of systemic exploit risk. PolyGuard bridges the gap between reactive post-facto security alerts and true pre-execution threat mitigation by combining:
+
 1. **Pre-Execution RPC Mempool Firewall:** Inspects incoming transactions with sub-15ms latency to block MEV sandwich attacks, arbitrage frontrunning, and reentrancy vectors before block inclusion.
 2. **AggLayer LxLy Bridge Sentinel:** Continuously validates 32-depth Merkle tree exit roots across Polygon PoS, Polygon zkEVM, and custom CDK Appchains.
 3. **Pessimistic Prover ZK Engine:** Mathematically enforces balance invariants ($\sum W_k \le \sum D_k$) to prevent single-rollup liquidity inflation.
@@ -68,15 +70,18 @@ As Web3 scales to multi-chain zero-knowledge rollup architectures, cross-chain b
 ## 🔥 Key Innovations & Core Modules
 
 ### 1. ⚡ Pre-Execution Mempool Firewall
+
 - Intercepts raw `eth_sendRawTransaction` payloads prior to block proposal.
 - Simulates EVM execution state overrides to detect reentrancy locks, unverified proxy delegate calls, and slippage exploitation.
 - Reroutes vulnerable institutional transactions through encrypted SGX enclaves.
 
 ### 2. 🌉 AggLayer LxLy Exit Root Validation
+
 - Direct socket synchronization with `PolygonRollupManager.sol`.
 - Monitors non-interactive Poseidon hash Merkle commitments across child rollups to guarantee zero double-spend nullifier replays.
 
 ### 3. 🛡️ Pessimistic Prover Balance Invariants
+
 Enforces the fundamental cryptographic equality for any connected rollup $k$:
 
 $$\sum_{i=1}^{M} W_{k,i} \le \sum_{j=1}^{P} D_{k,j} \quad \forall k \in \text{AggLayer}$$
@@ -84,6 +89,7 @@ $$\sum_{i=1}^{M} W_{k,i} \le \sum_{j=1}^{P} D_{k,j} \quad \forall k \in \text{Ag
 If a zero-knowledge batch proof attempts to execute withdrawals exceeding historical deposits, PolyGuard emits a signed emergency circuit breaker proposal.
 
 ### 4. 🤖 Gemini AI Agent Security Swarm
+
 - **Code Auditor Agent:** Decompiles raw EVM bytecode into opcode streams, scoring vulnerability Defcon levels.
 - **Threat Detection Agent:** Contextualizes live network signals with historical exploit signatures.
 - **Compliance Agent:** Generates non-interactive Pedersen commitment proofs for regulatory reporting.
@@ -94,25 +100,27 @@ If a zero-knowledge batch proof attempts to execute withdrawals exceeding histor
 
 PolyGuard includes a comprehensive suite of formal technical whitepapers, architectural blueprints, pitch decks, and cryptographic specifications in the `/docs` directory and project root:
 
-| Document | Path | Description |
-| :--- | :--- | :--- |
-| 📖 **Master Technical Whitepaper** | [`/DOCUMENTATION.md`](./DOCUMENTATION.md) | Full institutional technical documentation & whitepaper compilation. |
-| 📑 **Official Whitepaper** | [`/docs/WHITE_PAPER.md`](./docs/WHITE_PAPER.md) | Detailed academic & engineering specification of the PolyGuard engine. |
-| 🚀 **Executive Pitch Deck** | [`/docs/PITCH_DECK.md`](./docs/PITCH_DECK.md) | Investor presentation, market size, $3.2B problem analysis & business model. |
-| 🏗️ **System Architecture** | [`/docs/SYSTEM_ARCHITECTURE.md`](./docs/SYSTEM_ARCHITECTURE.md) | Component blueprints, Express backend pipelines & Framer Motion UI layout. |
-| 🔐 **ZK Specification** | [`/docs/ZK_SPECIFICATION.md`](./docs/ZK_SPECIFICATION.md) | Circom 2.1 zero-knowledge circuit definitions & Goldilocks field benchmarks. |
-| 💻 **API & SDK Reference** | [`/docs/API_AND_SDK_GUIDE.md`](./docs/API_AND_SDK_GUIDE.md) | `@polyguard/core-sdk` TypeScript integration guide, RPC endpoints & WS stream. |
-| 🏛️ **MiCA & FATF Framework** | [`/docs/COMPLIANCE_MICA_FRAMEWORK.md`](./docs/COMPLIANCE_MICA_FRAMEWORK.md) | Zero-knowledge solvency & AML compliance verification guidelines. |
+| Document                           | Path                                                                        | Description                                                                    |
+| :--------------------------------- | :-------------------------------------------------------------------------- | :----------------------------------------------------------------------------- |
+| 📖 **Master Technical Whitepaper** | [`/DOCUMENTATION.md`](./DOCUMENTATION.md)                                   | Full institutional technical documentation & whitepaper compilation.           |
+| 📑 **Official Whitepaper**         | [`/docs/WHITE_PAPER.md`](./docs/WHITE_PAPER.md)                             | Detailed academic & engineering specification of the PolyGuard engine.         |
+| 🚀 **Executive Pitch Deck**        | [`/docs/PITCH_DECK.md`](./docs/PITCH_DECK.md)                               | Investor presentation, market size, $3.2B problem analysis & business model.   |
+| 🏗️ **System Architecture**         | [`/docs/SYSTEM_ARCHITECTURE.md`](./docs/SYSTEM_ARCHITECTURE.md)             | Component blueprints, Express backend pipelines & Framer Motion UI layout.     |
+| 🔐 **ZK Specification**            | [`/docs/ZK_SPECIFICATION.md`](./docs/ZK_SPECIFICATION.md)                   | Circom 2.1 zero-knowledge circuit definitions & Goldilocks field benchmarks.   |
+| 💻 **API & SDK Reference**         | [`/docs/API_AND_SDK_GUIDE.md`](./docs/API_AND_SDK_GUIDE.md)                 | `@polyguard/core-sdk` TypeScript integration guide, RPC endpoints & WS stream. |
+| 🏛️ **MiCA & FATF Framework**       | [`/docs/COMPLIANCE_MICA_FRAMEWORK.md`](./docs/COMPLIANCE_MICA_FRAMEWORK.md) | Zero-knowledge solvency & AML compliance verification guidelines.              |
 
 ---
 
 ## 💻 Quick Start & Local Setup
 
 ### Prerequisites
+
 - **Node.js:** v20.x or higher
 - **Package Manager:** `npm` (v10+) or `bun`
 
 ### 1. Repository Clone & Dependency Installation
+
 ```bash
 git clone https://github.com/polyguard/polyguard-core.git
 cd polyguard-core
@@ -120,22 +128,29 @@ npm install
 ```
 
 ### 2. Environment Configuration
+
 Create a `.env` file based on `.env.example`:
+
 ```bash
 cp .env.example .env
 ```
+
 Add your Google Gemini API Key:
+
 ```env
 GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
 ### 3. Run Development Server
+
 ```bash
 npm run dev
 ```
+
 The application boots an Express server with Vite middleware on port `3000` at `http://localhost:3000`.
 
 ### 4. Production Build & Execution
+
 ```bash
 # Bundle frontend and compile backend via esbuild
 npm run build
@@ -148,13 +163,13 @@ npm run start
 
 ## ⚡ Performance Metrics & Validation Benchmarks
 
-| Metric | Target Standard | PolyGuard Actual |
-| :--- | :--- | :--- |
-| **P99 Mempool Inspection Latency** | < 50ms | **12.4ms** |
-| **False Positive Detection Rate** | < 0.5% | **0.04%** |
-| **Max Network Throughput** | 10,000 TPS | **42,000 TPS** |
-| **ZK Proof Verification Time** | < 2.0s | **0.84s** |
-| **Historical Exploit Catch Rate** | > 95% | **99.2%** |
+| Metric                             | Target Standard | PolyGuard Actual |
+| :--------------------------------- | :-------------- | :--------------- |
+| **P99 Mempool Inspection Latency** | < 50ms          | **12.4ms**       |
+| **False Positive Detection Rate**  | < 0.5%          | **0.04%**        |
+| **Max Network Throughput**         | 10,000 TPS      | **42,000 TPS**   |
+| **ZK Proof Verification Time**     | < 2.0s          | **0.84s**        |
+| **Historical Exploit Catch Rate**  | > 95%           | **99.2%**        |
 
 ---
 

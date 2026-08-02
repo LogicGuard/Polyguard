@@ -3,22 +3,23 @@ import Card from '../common/Card';
 import { CpuIcon, ShieldCheckIcon, AuditorIcon, BridgeIcon, ThreatIcon } from '../Icons';
 
 interface KernelFile {
-    path: string;
-    language: string;
-    category: string;
-    badgeColor: string;
-    description: string;
-    code: string;
+  path: string;
+  language: string;
+  category: string;
+  badgeColor: string;
+  description: string;
+  code: string;
 }
 
 const KERNEL_FILES: KernelFile[] = [
-    {
-        path: '/kernel/rust-sp1-verifier/src/lib.rs',
-        language: 'Rust (SP1 zkVM)',
-        category: 'ZK State & Merkle Validator',
-        badgeColor: 'bg-orange-500/10 border-orange-500/30 text-orange-400',
-        description: 'Zero-knowledge SP1 RISC-V kernel for Polygon AggLayer state transitions and double-spend nullifier checking.',
-        code: `// PolyGuard SP1 zkVM Merkle Exit Root & Nullifier Validator
+  {
+    path: '/kernel/rust-sp1-verifier/src/lib.rs',
+    language: 'Rust (SP1 zkVM)',
+    category: 'ZK State & Merkle Validator',
+    badgeColor: 'bg-orange-500/10 border-orange-500/30 text-orange-400',
+    description:
+      'Zero-knowledge SP1 RISC-V kernel for Polygon AggLayer state transitions and double-spend nullifier checking.',
+    code: `// PolyGuard SP1 zkVM Merkle Exit Root & Nullifier Validator
 #![cfg_attr(not(feature = "std"), no_std)]
 extern crate alloc;
 use alloc::vec::Vec;
@@ -53,15 +54,16 @@ impl Sp1ExitRootValidator {
         }
         Ok(true)
     }
-}`
-    },
-    {
-        path: '/node/agglayer-consensus/validator.go',
-        language: 'Go (Golang)',
-        category: 'Consensus Validator Node',
-        badgeColor: 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400',
-        description: 'Concurrent Go routine validator for Polygon AggLayer LxLy Exit Tree synchronization and RPC firewalling.',
-        code: `package consensus
+}`,
+  },
+  {
+    path: '/node/agglayer-consensus/validator.go',
+    language: 'Go (Golang)',
+    category: 'Consensus Validator Node',
+    badgeColor: 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400',
+    description:
+      'Concurrent Go routine validator for Polygon AggLayer LxLy Exit Tree synchronization and RPC firewalling.',
+    code: `package consensus
 
 import (
 	"crypto/sha256"
@@ -99,15 +101,16 @@ func (v *LxLyMerkleValidator) ValidateCrossChainProof(
 		return false, errors.New("agglayer: exit root mismatch")
 	}
 	return true, nil
-}`
-    },
-    {
-        path: '/contracts/solidity/AggLayerExitVerifier.sol',
-        language: 'Solidity + Yul Asm',
-        category: 'Smart Contract Firewall',
-        badgeColor: 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400',
-        description: 'Solidity 0.8.28 bridge contract utilizing Yul inline assembly Keccak256 memory loops for minimal gas overhead.',
-        code: `// SPDX-License-Identifier: MIT
+}`,
+  },
+  {
+    path: '/contracts/solidity/AggLayerExitVerifier.sol',
+    language: 'Solidity + Yul Asm',
+    category: 'Smart Contract Firewall',
+    badgeColor: 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400',
+    description:
+      'Solidity 0.8.28 bridge contract utilizing Yul inline assembly Keccak256 memory loops for minimal gas overhead.',
+    code: `// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
 contract AggLayerExitVerifier {
@@ -140,15 +143,16 @@ contract AggLayerExitVerifier {
         require(computedHash == l1MerkleRoot, "ERR_INVALID_MERKLE_ROOT");
         return true;
     }
-}`
-    },
-    {
-        path: '/contracts/huff/GasOptimizedVault.huff',
-        language: 'Huff (EVM Assembly)',
-        category: 'Low-Level EVM Bytecode',
-        badgeColor: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400',
-        description: 'Huff assembly macro contract generating raw EVM opcodes directly without Solidity compiler overhead.',
-        code: `/// @title PolyGuard Minimal-Gas Vault (Huff EVM Low-Level Assembly)
+}`,
+  },
+  {
+    path: '/contracts/huff/GasOptimizedVault.huff',
+    language: 'Huff (EVM Assembly)',
+    category: 'Low-Level EVM Bytecode',
+    badgeColor: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400',
+    description:
+      'Huff assembly macro contract generating raw EVM opcodes directly without Solidity compiler overhead.',
+    code: `/// @title PolyGuard Minimal-Gas Vault (Huff EVM Low-Level Assembly)
 #define function deposit() payable returns ()
 #define function withdraw(uint256) nonpayable returns ()
 
@@ -171,15 +175,16 @@ contract AggLayerExitVerifier {
     0x00 0x00 revert
     deposit_jump:
         DEPOSIT()
-}`
-    },
-    {
-        path: '/kernel/ebpf-firewall/src/xdp_filter.c',
-        language: 'C (eBPF XDP Kernel)',
-        category: 'Linux Kernel Socket Filter',
-        badgeColor: 'bg-blue-500/10 border-blue-500/30 text-blue-400',
-        description: 'Linux eBPF XDP C Kernel program that inspects TCP calldata packets at port 8545 to drop exploit signatures at driver latency.',
-        code: `// PolyGuard Linux eBPF XDP Packet Firewall (C Language)
+}`,
+  },
+  {
+    path: '/kernel/ebpf-firewall/src/xdp_filter.c',
+    language: 'C (eBPF XDP Kernel)',
+    category: 'Linux Kernel Socket Filter',
+    badgeColor: 'bg-blue-500/10 border-blue-500/30 text-blue-400',
+    description:
+      'Linux eBPF XDP C Kernel program that inspects TCP calldata packets at port 8545 to drop exploit signatures at driver latency.',
+    code: `// PolyGuard Linux eBPF XDP Packet Firewall (C Language)
 #include <linux/bpf.h>
 #include <linux/if_ether.h>
 #include <linux/ip.h>
@@ -212,15 +217,16 @@ int polyguard_rpc_packet_filter(struct xdp_md *ctx) {
         }
     }
     return XDP_PASS;
-}`
-    },
-    {
-        path: '/circuits/circom/RegulatorySolvency.circom',
-        language: 'Circom 2.1.8',
-        category: 'ZK Regulatory Compliance',
-        badgeColor: 'bg-purple-500/10 border-purple-500/30 text-purple-400',
-        description: 'Zero-knowledge solvency & FATF Travel Rule proof circuit preserving wallet identity and balance privacy.',
-        code: `pragma circom 2.1.8;
+}`,
+  },
+  {
+    path: '/circuits/circom/RegulatorySolvency.circom',
+    language: 'Circom 2.1.8',
+    category: 'ZK Regulatory Compliance',
+    badgeColor: 'bg-purple-500/10 border-purple-500/30 text-purple-400',
+    description:
+      'Zero-knowledge solvency & FATF Travel Rule proof circuit preserving wallet identity and balance privacy.',
+    code: `pragma circom 2.1.8;
 include "../node_modules/circomlib/circuits/poseidon.circom";
 include "../node_modules/circomlib/circuits/comparators.circom";
 
@@ -240,15 +246,16 @@ template RegulatorySolvencyCircuit(TREE_DEPTH) {
 
     isAccreditedAndSolvent <-- solvencyComparator.out;
 }
-component main {public [minRequiredTotalUsd]} = RegulatorySolvencyCircuit(20);`
-    },
-    {
-        path: '/circuits/halo2/src/compliance_circuit.rs',
-        language: 'Rust (Halo2 Plonkish)',
-        category: 'ZK Plonkish Constraint System',
-        badgeColor: 'bg-orange-500/10 border-orange-500/30 text-orange-400',
-        description: 'Plonkish arithmetization in Rust Halo2 for high-speed non-interactive MiCA and FATF solvency verification.',
-        code: `use halo2_proofs::{
+component main {public [minRequiredTotalUsd]} = RegulatorySolvencyCircuit(20);`,
+  },
+  {
+    path: '/circuits/halo2/src/compliance_circuit.rs',
+    language: 'Rust (Halo2 Plonkish)',
+    category: 'ZK Plonkish Constraint System',
+    badgeColor: 'bg-orange-500/10 border-orange-500/30 text-orange-400',
+    description:
+      'Plonkish arithmetization in Rust Halo2 for high-speed non-interactive MiCA and FATF solvency verification.',
+    code: `use halo2_proofs::{
     arithmetic::Field,
     circuit::{Layouter, SimpleFloorPlanner, Value},
     plonk::{Advice, Circuit, Column, ConstraintSystem, Error, Selector},
@@ -277,15 +284,16 @@ impl<F: Field> Circuit<F> for FATFSolvencyCircuit<F> {
         (bal, thresh, sel)
     }
     // ...
-}`
-    },
-    {
-        path: '/kernel/cpp-kzg/src/kzg_verifier.cpp',
-        language: 'C++20 (EIP-4844 KZG)',
-        category: 'Polygon Rollup Blob Verifier',
-        badgeColor: 'bg-red-500/10 border-red-500/30 text-red-400',
-        description: 'C++20 high-speed polynomial commitment verifier for EIP-4844 / Polygon Rollup data availability blobs.',
-        code: `// PolyGuard C++20 KZG Polynomial Commitment Verifier
+}`,
+  },
+  {
+    path: '/kernel/cpp-kzg/src/kzg_verifier.cpp',
+    language: 'C++20 (EIP-4844 KZG)',
+    category: 'Polygon Rollup Blob Verifier',
+    badgeColor: 'bg-red-500/10 border-red-500/30 text-red-400',
+    description:
+      'C++20 high-speed polynomial commitment verifier for EIP-4844 / Polygon Rollup data availability blobs.',
+    code: `// PolyGuard C++20 KZG Polynomial Commitment Verifier
 #include <iostream>
 #include <cstring>
 
@@ -310,15 +318,16 @@ public:
     }
 };
 
-} // namespace polyguard::kzg`
-    },
-    {
-        path: '/prover/cairo-stark/agglayer_prover.cairo',
-        language: 'Cairo 2.0 (STARK)',
-        category: 'Zero-Knowledge STARK Prover',
-        badgeColor: 'bg-amber-500/10 border-amber-500/30 text-amber-400',
-        description: 'Cairo programming language implementation for STARK trace verification of cross-chain state transitions.',
-        code: `// PolyGuard Cairo STARK Zero-Knowledge Execution Trace Verifier
+} // namespace polyguard::kzg`,
+  },
+  {
+    path: '/prover/cairo-stark/agglayer_prover.cairo',
+    language: 'Cairo 2.0 (STARK)',
+    category: 'Zero-Knowledge STARK Prover',
+    badgeColor: 'bg-amber-500/10 border-amber-500/30 text-amber-400',
+    description:
+      'Cairo programming language implementation for STARK trace verification of cross-chain state transitions.',
+    code: `// PolyGuard Cairo STARK Zero-Knowledge Execution Trace Verifier
 use core::pedersen::pedersen;
 
 #[derive(Copy, Drop, Serde)]
@@ -338,15 +347,16 @@ pub impl StarkExitVerifierImpl of StarkExitVerifierTrait {
         let computed_commitment = pedersen(hash_state, header.rollup_id.into());
         computed_commitment == committed_root
     }
-}`
-    },
-    {
-        path: '/contracts/move/PolyGuardVault.move',
-        language: 'Move Language',
-        category: 'Formal Resource Verification',
-        badgeColor: 'bg-teal-500/10 border-teal-500/30 text-teal-400',
-        description: 'Move programming language contract leveraging linear type safety to guarantee non-duplicable balance invariants.',
-        code: `// PolyGuard Resource-Oriented Security Vault
+}`,
+  },
+  {
+    path: '/contracts/move/PolyGuardVault.move',
+    language: 'Move Language',
+    category: 'Formal Resource Verification',
+    badgeColor: 'bg-teal-500/10 border-teal-500/30 text-teal-400',
+    description:
+      'Move programming language contract leveraging linear type safety to guarantee non-duplicable balance invariants.',
+    code: `// PolyGuard Resource-Oriented Security Vault
 module 0x1::PolyGuardVault {
     use std::signer;
 
@@ -362,15 +372,16 @@ module 0x1::PolyGuardVault {
         };
         move_to(account, collateral);
     }
-}`
-    },
-    {
-        path: '/ml-kernel/python-vectorizer/evm_opcode_embedder.py',
-        language: 'Python 3.11+ (ML/CUDA)',
-        category: 'Neural Threat Vectorizer',
-        badgeColor: 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400',
-        description: 'Python PyTorch/NumPy EVM opcode embedder for Defcon neural classification and threat vector generation.',
-        code: `import numpy as np
+}`,
+  },
+  {
+    path: '/ml-kernel/python-vectorizer/evm_opcode_embedder.py',
+    language: 'Python 3.11+ (ML/CUDA)',
+    category: 'Neural Threat Vectorizer',
+    badgeColor: 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400',
+    description:
+      'Python PyTorch/NumPy EVM opcode embedder for Defcon neural classification and threat vector generation.',
+    code: `import numpy as np
 import hashlib
 from typing import Dict
 
@@ -398,15 +409,16 @@ class EvmOpcodeVectorizer:
 
         score = min(100.0, float(total_risk / max(1, len(bytecode)) * 45.0))
         return {"score": round(score, 2), "embedding_dim": self.embedding_dim}
-`
-    },
-    {
-        path: '/contracts/yul/ERC1967ProxyGuard.yul',
-        language: 'Pure Yul Assembly',
-        category: 'ERC-1967 Storage Slot Guard',
-        badgeColor: 'bg-pink-500/10 border-pink-500/30 text-pink-400',
-        description: 'Pure Yul low-level assembly implementation slot lock & checks-effects-interactions reentrancy guard.',
-        code: `object "PolyGuardERC1967Proxy" {
+`,
+  },
+  {
+    path: '/contracts/yul/ERC1967ProxyGuard.yul',
+    language: 'Pure Yul Assembly',
+    category: 'ERC-1967 Storage Slot Guard',
+    badgeColor: 'bg-pink-500/10 border-pink-500/30 text-pink-400',
+    description:
+      'Pure Yul low-level assembly implementation slot lock & checks-effects-interactions reentrancy guard.',
+    code: `object "PolyGuardERC1967Proxy" {
     code {
         sstore(0, caller())
         let implSlot := 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc
@@ -426,15 +438,16 @@ class EvmOpcodeVectorizer:
             sstore(2, 1)
         }
     }
-}`
-    },
-    {
-        path: '/backend/zig-mempool-parser/mempool_parser.zig',
-        language: 'Zig 0.12+',
-        category: 'Zero-Allocation Mempool Parser',
-        badgeColor: 'bg-yellow-600/10 border-yellow-600/30 text-yellow-500',
-        description: 'Zero-allocation Zig mempool inspector for sub-microsecond EVM transaction risk scoring.',
-        code: `const std = @import("std");
+}`,
+  },
+  {
+    path: '/backend/zig-mempool-parser/mempool_parser.zig',
+    language: 'Zig 0.12+',
+    category: 'Zero-Allocation Mempool Parser',
+    badgeColor: 'bg-yellow-600/10 border-yellow-600/30 text-yellow-500',
+    description:
+      'Zero-allocation Zig mempool inspector for sub-microsecond EVM transaction risk scoring.',
+    code: `const std = @import("std");
 
 pub fn analyzeMempoolPayload(allocator: std.mem.Allocator, bytecode: []const u8) !f32 {
     _ = allocator;
@@ -443,41 +456,44 @@ pub fn analyzeMempoolPayload(allocator: std.mem.Allocator, bytecode: []const u8)
         if (b == 0xF4 or b == 0xFF) risk += 10.0;
     }
     return risk;
-}`
-    },
-    {
-        path: '/backend/nim-rpc-relay/rpc_relay.nim',
-        language: 'Nim 2.0+',
-        category: 'Asynchronous RPC Relay',
-        badgeColor: 'bg-emerald-600/10 border-emerald-600/30 text-emerald-400',
-        description: 'High-concurrency Nim JSON-RPC gateway protecting validators against MEV sandwich attacks.',
-        code: `import json, strutils
+}`,
+  },
+  {
+    path: '/backend/nim-rpc-relay/rpc_relay.nim',
+    language: 'Nim 2.0+',
+    category: 'Asynchronous RPC Relay',
+    badgeColor: 'bg-emerald-600/10 border-emerald-600/30 text-emerald-400',
+    description:
+      'High-concurrency Nim JSON-RPC gateway protecting validators against MEV sandwich attacks.',
+    code: `import json, strutils
 
 proc inspectPayload*(payload: string): bool =
     try:
         let node = parseJson(payload)
         return node.hasKey("method")
     except:
-        return false`
-    },
-    {
-        path: '/backend/ocaml-formal-verifier/verifier.ml',
-        language: 'OCaml 5.0+',
-        category: 'Symbolic Formal Verifier',
-        badgeColor: 'bg-orange-600/10 border-orange-600/30 text-orange-400',
-        description: 'OCaml formal verification engine checking mathematical invariants against state corruption.',
-        code: `type status = Valid | Violated of string
+        return false`,
+  },
+  {
+    path: '/backend/ocaml-formal-verifier/verifier.ml',
+    language: 'OCaml 5.0+',
+    category: 'Symbolic Formal Verifier',
+    badgeColor: 'bg-orange-600/10 border-orange-600/30 text-orange-400',
+    description:
+      'OCaml formal verification engine checking mathematical invariants against state corruption.',
+    code: `type status = Valid | Violated of string
 
 let check_invariant amount max =
-    if amount > max then Violated "OVERFLOW" else Valid`
-    },
-    {
-        path: '/backend/cpp-evm-jit/evm_jit.cpp',
-        language: 'C++20 LLVM JIT',
-        category: 'EVM Bytecode JIT Engine',
-        badgeColor: 'bg-red-600/10 border-red-600/30 text-red-500',
-        description: 'C++20 LLVM JIT engine compiling EVM bytecode directly to native machine instructions.',
-        code: `#include <vector>
+    if amount > max then Violated "OVERFLOW" else Valid`,
+  },
+  {
+    path: '/backend/cpp-evm-jit/evm_jit.cpp',
+    language: 'C++20 LLVM JIT',
+    category: 'EVM Bytecode JIT Engine',
+    badgeColor: 'bg-red-600/10 border-red-600/30 text-red-500',
+    description:
+      'C++20 LLVM JIT engine compiling EVM bytecode directly to native machine instructions.',
+    code: `#include <vector>
 #include <cstdint>
 
 uint64_t compile_and_execute(const std::vector<uint8_t>& code) {
@@ -486,161 +502,188 @@ uint64_t compile_and_execute(const std::vector<uint8_t>& code) {
         if (byte == 0xF4) gas += 5000;
     }
     return gas;
-}`
-    }
+}`,
+  },
 ];
 
 const KernelRepositoryView: React.FC = () => {
-    const [selectedIndex, setSelectedIndex] = useState(0);
-    const [copiedPath, setCopiedPath] = useState<string | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [copiedPath, setCopiedPath] = useState<string | null>(null);
 
-    const current = KERNEL_FILES[selectedIndex];
+  const current = KERNEL_FILES[selectedIndex];
 
-    const handleCopy = (code: string, path: string) => {
-        navigator.clipboard.writeText(code);
-        setCopiedPath(path);
-        setTimeout(() => setCopiedPath(null), 2000);
-    };
+  const handleCopy = (code: string, path: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedPath(path);
+    setTimeout(() => setCopiedPath(null), 2000);
+  };
 
-    return (
-        <div className="space-y-8 pb-12 animate-in fade-in duration-300">
-            {/* Header Banner */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gradient-to-r from-[#101010] via-[#0D0D0D] to-[#121212] p-6 border border-white/10">
-                <div>
-                    <div className="flex items-center gap-3 mb-2">
-                        <span className="px-2 py-0.5 bg-orange-500/10 border border-orange-500/30 text-orange-400 text-[9px] font-mono font-black uppercase tracking-widest">
-                            Git Polyglot Index
-                        </span>
-                        <span className="text-xs font-mono text-gray-500 uppercase tracking-widest">
-                            // 16 NATIVE KERNEL LANGUAGES
-                        </span>
-                    </div>
-                    <h1 className="text-2xl font-black text-white uppercase tracking-tight">
-                        PolyGuard Specialized Kernel Repository
-                    </h1>
-                    <p className="text-xs font-mono text-gray-400 mt-1 max-w-3xl">
-                        Explore the multi-language security architecture of PolyGuard. Each security layer is implemented in its most specialized native programming language—from Rust SP1 zkVMs and Go consensus validators to C eBPF, Zig, Nim, OCaml, and C++ JIT engines.
-                    </p>
-                </div>
-                <div className="flex items-center gap-2">
-                    <div className="px-3 py-2 bg-white/5 border border-white/10 text-center">
-                        <div className="text-[10px] font-mono text-gray-500 uppercase">Languages</div>
-                        <div className="text-lg font-black text-white font-mono">16+</div>
-                    </div>
-                    <div className="px-3 py-2 bg-white/5 border border-white/10 text-center">
-                        <div className="text-[10px] font-mono text-gray-500 uppercase">Git Standard</div>
-                        <div className="text-lg font-black text-emerald-400 font-mono">Polyglot AA</div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Language Selection Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                {KERNEL_FILES.map((file, idx) => (
-                    <button
-                        key={file.path}
-                        onClick={() => setSelectedIndex(idx)}
-                        className={`p-3 text-left transition-all border flex flex-col justify-between ${
-                            selectedIndex === idx
-                                ? 'bg-white/10 border-white text-white shadow-lg'
-                                : 'bg-[#0A0A0A] border-white/10 text-gray-400 hover:bg-white/5 hover:text-white'
-                        }`}
-                    >
-                        <div>
-                            <div className="text-[9px] font-mono uppercase tracking-widest text-gray-500 mb-1 truncate">
-                                {file.category}
-                            </div>
-                            <div className="text-xs font-bold font-mono tracking-tight text-white">
-                                {file.language}
-                            </div>
-                        </div>
-                        <div className="mt-3 text-[9px] font-mono text-gray-600 truncate">
-                            {file.path.split('/').pop()}
-                        </div>
-                    </button>
-                ))}
-            </div>
-
-            {/* Main Code & Detail Panel */}
-            <Card className="p-0 overflow-hidden border-white/10 bg-[#080808]">
-                <div className="p-4 bg-white/5 border-b border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <div className="flex items-center gap-3">
-                        <span className={`px-2.5 py-0.5 rounded-sm text-[10px] font-mono font-black uppercase tracking-widest border ${current.badgeColor}`}>
-                            {current.language}
-                        </span>
-                        <span className="text-xs font-mono font-bold text-white tracking-tight">
-                            {current.path}
-                        </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={() => handleCopy(current.code, current.path)}
-                            className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-mono uppercase font-bold tracking-widest transition-colors border border-white/10"
-                        >
-                            {copiedPath === current.path ? '✓ COPIED TO CLIPBOARD' : 'COPY KERNEL SOURCE'}
-                        </button>
-                    </div>
-                </div>
-
-                <div className="p-4 bg-white/5 border-b border-white/5">
-                    <p className="text-xs font-mono text-gray-300 leading-relaxed">
-                        {current.description}
-                    </p>
-                </div>
-
-                <pre className="p-6 text-xs font-mono text-blue-300 overflow-x-auto custom-scrollbar leading-relaxed bg-[#050505]">
-                    <code>{current.code}</code>
-                </pre>
-            </Card>
-
-            {/* Polyglot Git Architecture Overview Matrix */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="p-5 border-white/10 bg-[#0B0B0B]">
-                    <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-orange-400 mb-2">
-                        01 // Zero-Knowledge &amp; Proving Stack
-                    </h3>
-                    <p className="text-xs font-mono text-gray-400 leading-relaxed mb-4">
-                        Cryptographic state proofs and regulatory solvency circuits are implemented in Rust (SP1 zkVM &amp; Halo2), Circom 2.1.8, and Cairo STARKs for non-interactive verification.
-                    </p>
-                    <div className="flex flex-wrap gap-1.5">
-                        <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-[9px] font-mono text-white">Rust (.rs)</span>
-                        <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-[9px] font-mono text-white">Circom (.circom)</span>
-                        <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-[9px] font-mono text-white">Cairo (.cairo)</span>
-                    </div>
-                </Card>
-
-                <Card className="p-5 border-white/10 bg-[#0B0B0B]">
-                    <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-cyan-400 mb-2">
-                        02 // Node Consensus &amp; Kernel Firewall
-                    </h3>
-                    <p className="text-xs font-mono text-gray-400 leading-relaxed mb-4">
-                        High-concurrency AggLayer LxLy state synchronization runs in Go (Golang), while line-rate packet inspection is executed by C eBPF XDP kernel hooks at driver latency.
-                    </p>
-                    <div className="flex flex-wrap gap-1.5">
-                        <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-[9px] font-mono text-white">Go (.go)</span>
-                        <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-[9px] font-mono text-white">C eBPF (.c)</span>
-                        <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-[9px] font-mono text-white">C++20 (.cpp)</span>
-                    </div>
-                </Card>
-
-                <Card className="p-5 border-white/10 bg-[#0B0B0B]">
-                    <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-indigo-400 mb-2">
-                        03 // EVM &amp; Multi-VM Contract Layer
-                    </h3>
-                    <p className="text-xs font-mono text-gray-400 leading-relaxed mb-4">
-                        Smart contracts target Solidity 0.8.28 with Yul inline assembly, raw Huff EVM macros for zero-overhead gas savings, and Move language for linear resource invariants.
-                    </p>
-                    <div className="flex flex-wrap gap-1.5">
-                        <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-[9px] font-mono text-white">Solidity (.sol)</span>
-                        <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-[9px] font-mono text-white">Yul (.yul)</span>
-                        <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-[9px] font-mono text-white">Huff (.huff)</span>
-                        <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-[9px] font-mono text-white">Move (.move)</span>
-                        <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-[9px] font-mono text-white">Python (.py)</span>
-                    </div>
-                </Card>
-            </div>
+  return (
+    <div className="space-y-8 pb-12 animate-in fade-in duration-300">
+      {/* Header Banner */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gradient-to-r from-[#101010] via-[#0D0D0D] to-[#121212] p-6 border border-white/10">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <span className="px-2 py-0.5 bg-orange-500/10 border border-orange-500/30 text-orange-400 text-[9px] font-mono font-black uppercase tracking-widest">
+              Git Polyglot Index
+            </span>
+            <span className="text-xs font-mono text-gray-500 uppercase tracking-widest">
+              // 16 NATIVE KERNEL LANGUAGES
+            </span>
+          </div>
+          <h1 className="text-2xl font-black text-white uppercase tracking-tight">
+            PolyGuard Specialized Kernel Repository
+          </h1>
+          <p className="text-xs font-mono text-gray-400 mt-1 max-w-3xl">
+            Explore the multi-language security architecture of PolyGuard. Each security layer is
+            implemented in its most specialized native programming language—from Rust SP1 zkVMs and
+            Go consensus validators to C eBPF, Zig, Nim, OCaml, and C++ JIT engines.
+          </p>
         </div>
-    );
+        <div className="flex items-center gap-2">
+          <div className="px-3 py-2 bg-white/5 border border-white/10 text-center">
+            <div className="text-[10px] font-mono text-gray-500 uppercase">Languages</div>
+            <div className="text-lg font-black text-white font-mono">16+</div>
+          </div>
+          <div className="px-3 py-2 bg-white/5 border border-white/10 text-center">
+            <div className="text-[10px] font-mono text-gray-500 uppercase">Git Standard</div>
+            <div className="text-lg font-black text-emerald-400 font-mono">Polyglot AA</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Language Selection Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+        {KERNEL_FILES.map((file, idx) => (
+          <button
+            key={file.path}
+            onClick={() => setSelectedIndex(idx)}
+            className={`p-3 text-left transition-all border flex flex-col justify-between ${
+              selectedIndex === idx
+                ? 'bg-white/10 border-white text-white shadow-lg'
+                : 'bg-[#0A0A0A] border-white/10 text-gray-400 hover:bg-white/5 hover:text-white'
+            }`}
+          >
+            <div>
+              <div className="text-[9px] font-mono uppercase tracking-widest text-gray-500 mb-1 truncate">
+                {file.category}
+              </div>
+              <div className="text-xs font-bold font-mono tracking-tight text-white">
+                {file.language}
+              </div>
+            </div>
+            <div className="mt-3 text-[9px] font-mono text-gray-600 truncate">
+              {file.path.split('/').pop()}
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Main Code & Detail Panel */}
+      <Card className="p-0 overflow-hidden border-white/10 bg-[#080808]">
+        <div className="p-4 bg-white/5 border-b border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div className="flex items-center gap-3">
+            <span
+              className={`px-2.5 py-0.5 rounded-sm text-[10px] font-mono font-black uppercase tracking-widest border ${current.badgeColor}`}
+            >
+              {current.language}
+            </span>
+            <span className="text-xs font-mono font-bold text-white tracking-tight">
+              {current.path}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handleCopy(current.code, current.path)}
+              className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-mono uppercase font-bold tracking-widest transition-colors border border-white/10"
+            >
+              {copiedPath === current.path ? '✓ COPIED TO CLIPBOARD' : 'COPY KERNEL SOURCE'}
+            </button>
+          </div>
+        </div>
+
+        <div className="p-4 bg-white/5 border-b border-white/5">
+          <p className="text-xs font-mono text-gray-300 leading-relaxed">{current.description}</p>
+        </div>
+
+        <pre className="p-6 text-xs font-mono text-blue-300 overflow-x-auto custom-scrollbar leading-relaxed bg-[#050505]">
+          <code>{current.code}</code>
+        </pre>
+      </Card>
+
+      {/* Polyglot Git Architecture Overview Matrix */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="p-5 border-white/10 bg-[#0B0B0B]">
+          <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-orange-400 mb-2">
+            01 // Zero-Knowledge &amp; Proving Stack
+          </h3>
+          <p className="text-xs font-mono text-gray-400 leading-relaxed mb-4">
+            Cryptographic state proofs and regulatory solvency circuits are implemented in Rust (SP1
+            zkVM &amp; Halo2), Circom 2.1.8, and Cairo STARKs for non-interactive verification.
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-[9px] font-mono text-white">
+              Rust (.rs)
+            </span>
+            <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-[9px] font-mono text-white">
+              Circom (.circom)
+            </span>
+            <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-[9px] font-mono text-white">
+              Cairo (.cairo)
+            </span>
+          </div>
+        </Card>
+
+        <Card className="p-5 border-white/10 bg-[#0B0B0B]">
+          <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-cyan-400 mb-2">
+            02 // Node Consensus &amp; Kernel Firewall
+          </h3>
+          <p className="text-xs font-mono text-gray-400 leading-relaxed mb-4">
+            High-concurrency AggLayer LxLy state synchronization runs in Go (Golang), while
+            line-rate packet inspection is executed by C eBPF XDP kernel hooks at driver latency.
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-[9px] font-mono text-white">
+              Go (.go)
+            </span>
+            <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-[9px] font-mono text-white">
+              C eBPF (.c)
+            </span>
+            <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-[9px] font-mono text-white">
+              C++20 (.cpp)
+            </span>
+          </div>
+        </Card>
+
+        <Card className="p-5 border-white/10 bg-[#0B0B0B]">
+          <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-indigo-400 mb-2">
+            03 // EVM &amp; Multi-VM Contract Layer
+          </h3>
+          <p className="text-xs font-mono text-gray-400 leading-relaxed mb-4">
+            Smart contracts target Solidity 0.8.28 with Yul inline assembly, raw Huff EVM macros for
+            zero-overhead gas savings, and Move language for linear resource invariants.
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-[9px] font-mono text-white">
+              Solidity (.sol)
+            </span>
+            <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-[9px] font-mono text-white">
+              Yul (.yul)
+            </span>
+            <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-[9px] font-mono text-white">
+              Huff (.huff)
+            </span>
+            <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-[9px] font-mono text-white">
+              Move (.move)
+            </span>
+            <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-[9px] font-mono text-white">
+              Python (.py)
+            </span>
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
 };
 
 export default KernelRepositoryView;

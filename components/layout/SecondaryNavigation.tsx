@@ -8,7 +8,11 @@ interface SecondaryNavigationProps {
   onItemClick: (id: string) => void;
 }
 
-const SecondaryNavigation: React.FC<SecondaryNavigationProps> = ({ items, activeItem, onItemClick }) => {
+const SecondaryNavigation: React.FC<SecondaryNavigationProps> = ({
+  items,
+  activeItem,
+  onItemClick,
+}) => {
   return (
     <nav className="flex items-center space-x-2 p-2 border-b border-glass-border bg-black/10 backdrop-blur-sm overflow-x-auto custom-scrollbar flex-shrink-0">
       {items.map((item) => (
@@ -16,7 +20,9 @@ const SecondaryNavigation: React.FC<SecondaryNavigationProps> = ({ items, active
           key={item.id}
           onClick={() => onItemClick(item.id)}
           className={`px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 relative whitespace-nowrap ${
-            activeItem === item.id ? 'text-white' : 'text-brand-text-light hover:bg-white/5 hover:text-white'
+            activeItem === item.id
+              ? 'text-white'
+              : 'text-brand-text-light hover:bg-white/5 hover:text-white'
           }`}
         >
           {activeItem === item.id && (

@@ -172,7 +172,10 @@ export interface DAOProposalAnalysisResult {
   ecosystemImpact: { positive: string; negative: string };
   communitySentiment: { for: string[]; against: string[] };
   risks: { type: 'Technical' | 'Economic' | 'Strategic'; description: string }[];
-  recommendation: { verdict: 'Consider for Approval' | 'Requires Revision' | 'Recommend Rejection'; summary: string };
+  recommendation: {
+    verdict: 'Consider for Approval' | 'Requires Revision' | 'Recommend Rejection';
+    summary: string;
+  };
 }
 
 export interface HighPotentialProject {
@@ -242,9 +245,10 @@ export interface SecurityAlert {
 }
 
 export interface OnChainEvent {
-    id: string;
-    timestamp: string; // ISO 8601 format
-    type: 'Contract Deployment' | 'High-Value Transfer' | 'DAO Vote' | 'Flash Loan' | 'Bridge Transfer';
-    details: string;
-    address: string;
+  id: string;
+  timestamp: string; // ISO 8601 format
+  type:
+    'Contract Deployment' | 'High-Value Transfer' | 'DAO Vote' | 'Flash Loan' | 'Bridge Transfer';
+  details: string;
+  address: string;
 }

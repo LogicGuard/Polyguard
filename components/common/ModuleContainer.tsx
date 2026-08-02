@@ -22,9 +22,13 @@ export const ModuleContainer: React.FC<ModuleContainerProps> = ({ children, modu
   if (hasError) {
     return (
       <div className="p-8 border border-red-900/30 bg-red-950/10 rounded-sm text-center my-8">
-        <h2 className="text-red-500 font-mono font-bold uppercase tracking-widest mb-2">Module_Execution_Failed</h2>
-        <p className="text-gray-500 text-xs font-mono mb-4">The module "{moduleName}" encountered a runtime error.</p>
-        <button 
+        <h2 className="text-red-500 font-mono font-bold uppercase tracking-widest mb-2">
+          Module_Execution_Failed
+        </h2>
+        <p className="text-gray-500 text-xs font-mono mb-4">
+          The module "{moduleName}" encountered a runtime error.
+        </p>
+        <button
           onClick={() => {
             setHasError(false);
             setIsLoading(true);
@@ -42,7 +46,7 @@ export const ModuleContainer: React.FC<ModuleContainerProps> = ({ children, modu
     <div className="relative w-full h-full">
       <AnimatePresence>
         {isLoading && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -51,12 +55,12 @@ export const ModuleContainer: React.FC<ModuleContainerProps> = ({ children, modu
           >
             <div className="flex flex-col items-center gap-3">
               <div className="flex gap-1.5">
-                {[1, 2, 3].map(i => (
-                  <motion.div 
+                {[1, 2, 3].map((i) => (
+                  <motion.div
                     key={i}
-                    animate={{ 
+                    animate={{
                       height: [4, 14, 4],
-                      backgroundColor: ['#3b82f6', '#ffffff', '#3b82f6']
+                      backgroundColor: ['#3b82f6', '#ffffff', '#3b82f6'],
                     }}
                     transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }}
                     className="w-1 rounded-full bg-blue-500"
@@ -75,7 +79,7 @@ export const ModuleContainer: React.FC<ModuleContainerProps> = ({ children, modu
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -8 }}
-        transition={{ duration: 0.25, ease: "easeOut" }}
+        transition={{ duration: 0.25, ease: 'easeOut' }}
         className="relative h-full w-full"
       >
         {children}
