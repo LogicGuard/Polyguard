@@ -31,6 +31,18 @@ Institutional AI & Zero-Knowledge Security Infrastructure for Polygon AggLayer
 
 ---
 
+## 🎯 Status & CI/CD
+
+| Check | Status |
+| :--- | :--- |
+| **Build (Node.js)** | ![Node CI](https://github.com/LogicGuard/Polyguard/actions/workflows/node-ci.yml/badge.svg) |
+| **Build (Python)** | ![Python CI](https://github.com/LogicGuard/Polyguard/actions/workflows/python-ci.yml/badge.svg) |
+| **Build (Rust)** | ![Rust CI](https://github.com/LogicGuard/Polyguard/actions/workflows/rust-ci.yml/badge.svg) |
+| **Coverage** | ![Codecov](https://codecov.io/gh/LogicGuard/Polyguard/branch/main/graph/badge.svg) |
+| **Dependencies** | [![Dependabot](https://img.shields.io/badge/Dependabot-enabled-blue)](https://github.com/LogicGuard/Polyguard/blob/main/.github/dependabot.yml) |
+
+---
+
 ## 📌 Executive Overview
 
 **PolyGuard** is an enterprise-grade, real-time security matrix and multi-agent AI defense engine specifically engineered for the **Polygon AggLayer** unified liquidity ecosystem.
