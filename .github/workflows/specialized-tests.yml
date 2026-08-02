@@ -2,9 +2,12 @@ name: Specialized Tests Runner
 
 on:
   workflow_dispatch: {}
+  schedule:
+    - cron: '0 2 * * *' # nightly at 02:00 UTC
 
 permissions:
   contents: write
+  issues: write
 
 jobs:
   run-specialized-tests:
@@ -59,9 +62,34 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: specialized-test-results
-          path: SPECIALIZED_TEST_RESULTS.md
+          path: |
+            SPECIALIZED_TEST_RESULTS.md
+            SPECIALIZED_TEST_RESULTS.json
 
-      - name: Show short preview
-        run: |
-          echo "--- HEAD of results ---"
-          head -n 80 SPECIALIZED_TEST_RESULTS.md || true
+      - name: Create GitHub issue on critical findings
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const path = 'SPECIALIZED_TEST_RESULTS.json';
+            if (!fs.existsSync(path)) {
+              core.info('No JSON results found, skipping issue creation');
+            } else {
+              const data = JSON.parse(fs.readFileSync(path, 'utf8'));
+              if (data.critical_findings) {
+                const title = `CI Alert: Specialized tests found CRITICAL findings (${new Date().toISOString()})`;
+                const body = `Automated specialized tests detected critical findings.\n\nSummary:\n\n\`
+${JSON.stringify(data, null, 2)}\n\
+\nPlease review SPECIALIZED_TEST_RESULTS.md artifact for full logs.`;
+                await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title,
+                  body,
+                });
+              } else {
+                core.info('No critical findings detected')
+              }
+            }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

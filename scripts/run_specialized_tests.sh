@@ -115,13 +115,35 @@ fi
 # Make file writeable and show head
 chmod 644 "$OUTFILE"
 
+# Also produce a JSON summary for automated processing
+JSON_OUT="$ROOT_DIR/SPECIALIZED_TEST_RESULTS.json"
+jq -n --arg generated_at "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
+  --arg slither_log "$(test -f "$TMPDIR/slither.log" && echo "present" || echo "missing")" \
+  --arg mythril_log "$(test -f "$TMPDIR/mythril.log" && echo "present" || echo "missing")" \
+  --arg pytest_log "$(test -f "$TMPDIR/pytest.log" && echo "present" || echo "missing")" \
+  --arg ml_log "$(test -f "$TMPDIR/ml_check.log" && echo "present" || echo "missing")" \
+  --arg rpc_log "$(test -f "$TMPDIR/rpc_proxy.log" && echo "present" || echo "missing")" \
+  --arg slither_summary "$(test -f "$TMPDIR/slither_summary.json" && echo "present" || echo "missing")" \
+  '{generated_at:$generated_at, artifacts:{slither_log:$slither_log,mythril_log:$mythril_log,pytest_log:$pytest_log,ml_log:$ml_log,rpc_log:$rpc_log,slither_summary:$slither_summary}}' > "$JSON_OUT" || true
+
+# Determine if any CRITICAL markers exist
+CRITICAL=false
+if grep -q "CRITICAL" "$TMPDIR/pytest.log" 2>/dev/null || grep -q "CRITICAL" "$TMPDIR/slither.log" 2>/dev/null || grep -q "CRITICAL" "$TMPDIR/mythril.log" 2>/dev/null; then
+  CRITICAL=true
+fi
+
+# Add critical flag to JSON
+if command -v jq >/dev/null 2>&1; then
+  jq --argjson crit "$CRITICAL" '. + {critical_findings: $crit}' "$JSON_OUT" > "$JSON_OUT.tmp" && mv "$JSON_OUT.tmp" "$JSON_OUT" || true
+fi
+
 # Optionally commit results back to repo root if running in CI with push rights
 if [ -n "${GITHUB_ACTIONS:-}" ]; then
-  echo "Committing $OUTFILE back to repository (if changed)..."
+  echo "Committing $OUTFILE and $JSON_OUT back to repository (if changed)..."
   git config user.name "github-actions[bot]"
   git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
   git checkout -b specialized-test-results || true
-  git add "$OUTFILE" || true
+  git add "$OUTFILE" "$JSON_OUT" || true
   if git diff --staged --quiet; then
     echo "No changes to commit"
   else
@@ -131,4 +153,4 @@ if [ -n "${GITHUB_ACTIONS:-}" ]; then
 fi
 
 # Print location
-echo "Wrote results to $OUTFILE"
+echo "Wrote results to $OUTFILE and $JSON_OUT"
