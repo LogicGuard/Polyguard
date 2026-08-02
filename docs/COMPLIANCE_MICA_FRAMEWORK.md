@@ -2,7 +2,7 @@
 
 **Institutional Regulatory Compliance Manual**  
 **Framework Standards:** European Markets in Crypto-Assets (MiCA), FATF Travel Rule Recommendation 16, US Treasury OFAC Sanction Directives  
-**Version:** 4.2.0-STABLE  
+**Version:** 4.2.0-STABLE
 
 ---
 
@@ -31,14 +31,17 @@ PolyGuard solves this challenge by leveraging non-interactive **Zero-Knowledge P
 ```
 
 ### 2.1 Pillar 1: Proof of Asset Solvency (MiCA Article 36 & 45)
+
 - **Requirement:** Stablecoin issuers and Crypto-Asset Service Providers (CASPs) must maintain 1:1 asset reserve backing.
 - **PolyGuard ZK Solution:** Generates zero-knowledge proofs demonstrating total liquid liabilities $L \le R$ (reserves) without revealing the specific wallet balance of any individual client or institution.
 
 ### 2.2 Pillar 2: FATF Travel Rule Compliance (Recommendation 16)
+
 - **Requirement:** Transfers exceeding €1,000 between CASPs must transmit originator and beneficiary information.
 - **PolyGuard ZK Solution:** Encrypts customer PII off-chain and generates zk-SNARK proofs confirming that both parties are verified by accredited KYC providers without broadcasting real identities to the public blockchain.
 
 ### 2.3 Pillar 3: Automated OFAC / Sanctions Screening
+
 - **Requirement:** Block transactions involving sanctioned addresses.
 - **PolyGuard ZK Solution:** Maintains a cryptographic Merkle accumulator of sanctioned address hashes. Users generate non-membership proofs ($A \notin \text{SanctionsTree}$) without leaking their target transaction recipient address.
 
@@ -87,4 +90,4 @@ PolyGuard automatically archives cryptographically signed audit logs (`.json` & 
 
 ---
 
-*Copyright © 2026 PolyGuard Security Infrastructure Inc. All Rights Reserved.*
+_Copyright © 2026 PolyGuard Security Infrastructure Inc. All Rights Reserved._

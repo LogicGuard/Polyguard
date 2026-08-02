@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 
@@ -13,7 +12,7 @@ const StatsGrid: React.FC = () => {
   return (
     <section className="py-24 px-6 bg-[#030303] border-b border-white/5 relative overflow-hidden">
       <div className="absolute inset-0 tech-bg opacity-[0.03] pointer-events-none"></div>
-      
+
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1">
           {STATS.map((stat, i) => (
@@ -26,7 +25,7 @@ const StatsGrid: React.FC = () => {
               className="flex flex-col items-center lg:items-start p-10 bg-white/[0.01] border border-white/5 hover:bg-white/[0.03] hover:border-polygon-purple/30 transition-all group relative overflow-hidden"
             >
               <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-white/10 group-hover:border-polygon-purple transition-colors"></div>
-              
+
               <span className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.4em] mb-4 group-hover:text-polygon-purple-light transition-colors">
                 {stat.label}
               </span>
@@ -38,7 +37,7 @@ const StatsGrid: React.FC = () => {
               <div className="flex items-center gap-2 mt-4 pt-4 border-t border-white/5 w-full">
                 <div className="w-1.5 h-1.5 bg-polygon-purple rounded-full animate-pulse shadow-[0_0_8px_#7b3fe4]"></div>
                 <span className="text-[9px] font-mono text-gray-600 uppercase tracking-widest font-bold">
-                    {stat.sub}
+                  {stat.sub}
                 </span>
               </div>
             </motion.div>

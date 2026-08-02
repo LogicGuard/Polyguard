@@ -1,0 +1,36 @@
+# Auto detect text files and normalize line endings to LF
+* text=auto
+
+# TypeScript/JavaScript/JSX
+*.js text eol=lf
+*.jsx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+*.md text eol=lf
+
+# Python
+*.py text eol=lf
+*.pyi text eol=lf
+
+# Rust
+*.rs text eol=lf
+*.toml text eol=lf
+
+# Go
+*.go text eol=lf
+
+# Shell
+*.sh text eol=lf
+*.bash text eol=lf
+
+# Binary files
+*.lock binary
+*.jpg binary
+*.png binary
+*.gif binary
+*.ico binary
+*.mov binary
+*.mp4 binary
+*.mp3 binary

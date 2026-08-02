@@ -6,8 +6,15 @@
   "scripts": {
     "dev": "tsx server.ts",
     "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
-    "lint": "tsc --noEmit",
-    "start": "node dist/server.cjs"
+    "start": "node dist/server.cjs",
+    "lint": "tsc --noEmit && eslint --config eslint.config.cjs --ext .ts,.tsx,.js .",
+    "lint:fix": "eslint --config eslint.config.cjs --ext .ts,.tsx,.js --fix .",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,css}\"",
+    "test": "echo \"No tests configured. Add tests via pytest/jest\" && exit 0",
+    "ci": "npm run lint && npm run build",
+    "clean": "rm -rf dist node_modules .next .turbo coverage",
+    "precommit": "npm run lint:fix && npm run format"
   },
   "dependencies": {
     "@google/genai": "^1.27.0",
@@ -19,8 +26,13 @@
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "^22.14.0",
+    "@typescript-eslint/eslint-plugin": "^8.65.0",
+    "@typescript-eslint/parser": "^8.65.0",
     "@vitejs/plugin-react": "^5.0.0",
     "esbuild": "^0.28.1",
+    "eslint": "^9.39.5",
+    "eslint-config-prettier": "^8.10.2",
+    "prettier": "^3.9.6",
     "tsx": "^4.23.1",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"

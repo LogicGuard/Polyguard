@@ -112,144 +112,153 @@ contract Groth16ComplianceVerifier {
 }`;
 
 const ZKComplianceView: React.FC = () => {
-    const [address, setAddress] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [result, setResult] = useState<ZKProofVerificationResult | null>(null);
-    const [error, setError] = useState<string | null>(null);
-    const [circuitLang, setCircuitLang] = useState<'RUST_HALO2' | 'CIRCOM' | 'SOLIDITY'>('RUST_HALO2');
-    const { account } = useWallet();
+  const [address, setAddress] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<ZKProofVerificationResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [circuitLang, setCircuitLang] = useState<'RUST_HALO2' | 'CIRCOM' | 'SOLIDITY'>(
+    'RUST_HALO2'
+  );
+  const { account } = useWallet();
 
-    const handleAnalyze = async () => {
-        const addressToAnalyze = address.trim() || account;
-        if (!addressToAnalyze) {
-            setError('Please enter a wallet address or connect your wallet.');
-            return;
-        }
-        setIsLoading(true);
-        setResult(null);
-        setError(null);
+  const handleAnalyze = async () => {
+    const addressToAnalyze = address.trim() || account;
+    if (!addressToAnalyze) {
+      setError('Please enter a wallet address or connect your wallet.');
+      return;
+    }
+    setIsLoading(true);
+    setResult(null);
+    setError(null);
 
-        const { data, error: apiError } = await simulateZKProofVerification(addressToAnalyze);
-        if (data) setResult(data);
-        if (apiError) setError(apiError);
+    const { data, error: apiError } = await simulateZKProofVerification(addressToAnalyze);
+    if (data) setResult(data);
+    if (apiError) setError(apiError);
 
-        setIsLoading(false);
-    };
+    setIsLoading(false);
+  };
 
-    return (
-        <div>
-            <h1 className="text-3xl font-bold mb-2">Zero-Knowledge Compliance</h1>
-            <p className="text-brand-text-light mb-6">Simulate a privacy-preserving compliance check using Zero-Knowledge proofs.</p>
+  return (
+    <div>
+      <h1 className="text-3xl font-bold mb-2">Zero-Knowledge Compliance</h1>
+      <p className="text-brand-text-light mb-6">
+        Simulate a privacy-preserving compliance check using Zero-Knowledge proofs.
+      </p>
 
-            <Card className="p-6 max-w-2xl mb-6">
-                <div className="flex gap-2">
-                    <Input 
-                        placeholder="Enter wallet address or connect wallet"
-                        value={address}
-                        onChange={(e) => setAddress(e.target.value)}
-                        className="font-mono flex-1"
-                    />
-                    <Button onClick={handleAnalyze} disabled={isLoading}>
-                        {isLoading ? 'Verifying...' : 'Verify with ZK Proof'}
-                    </Button>
-                </div>
-            </Card>
-
-            {error && <Card className="p-4 bg-red-500/10 border-red-500/30 text-red-400">{error}</Card>}
-
-            {isLoading && <ViewLoader />}
-
-            {result && (
-                <div className="space-y-6">
-                    <Card className="p-6">
-                        <h2 className="text-xl font-semibold mb-4">Verification Report</h2>
-                         <div className={`p-4 rounded-lg mb-4 ${result.status === 'Verified' ? 'bg-green-500/10 text-green-300' : 'bg-red-500/10 text-red-300'}`}>
-                            <p className="font-bold text-lg">Status: {result.status}</p>
-                            <p className="text-sm">{result.summary}</p>
-                        </div>
-                    </Card>
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Card className="p-6">
-                            <h3 className="font-semibold mb-3">Verified Claims</h3>
-                            <ul className="space-y-2">
-                                {result.verifiedClaims.map((item, i) => (
-                                    <li key={i} className={`text-sm flex justify-between items-center ${item.status === 'Verified' ? 'text-green-300' : 'text-red-300'}`}>
-                                        <span className="text-brand-text">{item.claim}</span>
-                                        <span className="font-bold">{item.status}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </Card>
-                        <Card className="p-6">
-                            <h3 className="font-semibold mb-3">Privacy Preserved</h3>
-                             <ul className="list-disc list-inside space-y-1 text-sm text-brand-text-light">
-                                {result.privacyPreserved.map((item, i) => (
-                                    <li key={i}>{item}</li>
-                                ))}
-                            </ul>
-                        </Card>
-                    </div>
-                </div>
-            )}
-
-            {/* Polyglot ZK-SNARK Circuit Specification Card */}
-            <div className="mt-8">
-                <Card className="p-0 overflow-hidden border-white/10 bg-[#080808]">
-                    <div className="p-4 bg-white/5 border-b border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                        <div className="flex items-center gap-3">
-                            <span className="text-[10px] font-mono font-black uppercase text-white tracking-widest">
-                                ZK-SNARK Circuit Specification
-                            </span>
-                            <span className="text-[9px] font-mono text-gray-500 uppercase tracking-widest">
-                                // HALO2 PLONKISH &amp; CIRCOM 2.1.8
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                            <button
-                                onClick={() => setCircuitLang('RUST_HALO2')}
-                                className={`px-2.5 py-1 text-[9px] font-mono font-bold uppercase transition-all rounded-sm border ${
-                                    circuitLang === 'RUST_HALO2'
-                                        ? 'bg-orange-500 text-black border-orange-400'
-                                        : 'bg-white/5 text-gray-400 border-white/10 hover:text-white'
-                                }`}
-                            >
-                                RUST (HALO2)
-                            </button>
-                            <button
-                                onClick={() => setCircuitLang('CIRCOM')}
-                                className={`px-2.5 py-1 text-[9px] font-mono font-bold uppercase transition-all rounded-sm border ${
-                                    circuitLang === 'CIRCOM'
-                                        ? 'bg-purple-500 text-white border-purple-400'
-                                        : 'bg-white/5 text-gray-400 border-white/10 hover:text-white'
-                                }`}
-                            >
-                                CIRCOM 2.1.8
-                            </button>
-                            <button
-                                onClick={() => setCircuitLang('SOLIDITY')}
-                                className={`px-2.5 py-1 text-[9px] font-mono font-bold uppercase transition-all rounded-sm border ${
-                                    circuitLang === 'SOLIDITY'
-                                        ? 'bg-indigo-500 text-black border-indigo-400'
-                                        : 'bg-white/5 text-gray-400 border-white/10 hover:text-white'
-                                }`}
-                            >
-                                SOLIDITY (GROTH16)
-                            </button>
-                        </div>
-                    </div>
-                    <pre className="p-6 text-xs font-mono text-blue-300 overflow-x-auto custom-scrollbar leading-relaxed bg-[#050505]">
-                        <code>
-                            {circuitLang === 'RUST_HALO2'
-                                ? RUST_HALO2_CIRCUIT
-                                : circuitLang === 'CIRCOM'
-                                ? CIRCOM_2_CIRCUIT
-                                : SOLIDITY_GROTH16_VERIFIER}
-                        </code>
-                    </pre>
-                </Card>
-            </div>
+      <Card className="p-6 max-w-2xl mb-6">
+        <div className="flex gap-2">
+          <Input
+            placeholder="Enter wallet address or connect wallet"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            className="font-mono flex-1"
+          />
+          <Button onClick={handleAnalyze} disabled={isLoading}>
+            {isLoading ? 'Verifying...' : 'Verify with ZK Proof'}
+          </Button>
         </div>
-    );
+      </Card>
+
+      {error && <Card className="p-4 bg-red-500/10 border-red-500/30 text-red-400">{error}</Card>}
+
+      {isLoading && <ViewLoader />}
+
+      {result && (
+        <div className="space-y-6">
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-4">Verification Report</h2>
+            <div
+              className={`p-4 rounded-lg mb-4 ${result.status === 'Verified' ? 'bg-green-500/10 text-green-300' : 'bg-red-500/10 text-red-300'}`}
+            >
+              <p className="font-bold text-lg">Status: {result.status}</p>
+              <p className="text-sm">{result.summary}</p>
+            </div>
+          </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="p-6">
+              <h3 className="font-semibold mb-3">Verified Claims</h3>
+              <ul className="space-y-2">
+                {result.verifiedClaims.map((item, i) => (
+                  <li
+                    key={i}
+                    className={`text-sm flex justify-between items-center ${item.status === 'Verified' ? 'text-green-300' : 'text-red-300'}`}
+                  >
+                    <span className="text-brand-text">{item.claim}</span>
+                    <span className="font-bold">{item.status}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+            <Card className="p-6">
+              <h3 className="font-semibold mb-3">Privacy Preserved</h3>
+              <ul className="list-disc list-inside space-y-1 text-sm text-brand-text-light">
+                {result.privacyPreserved.map((item, i) => (
+                  <li key={i}>{item}</li>
+                ))}
+              </ul>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {/* Polyglot ZK-SNARK Circuit Specification Card */}
+      <div className="mt-8">
+        <Card className="p-0 overflow-hidden border-white/10 bg-[#080808]">
+          <div className="p-4 bg-white/5 border-b border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] font-mono font-black uppercase text-white tracking-widest">
+                ZK-SNARK Circuit Specification
+              </span>
+              <span className="text-[9px] font-mono text-gray-500 uppercase tracking-widest">
+                // HALO2 PLONKISH &amp; CIRCOM 2.1.8
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setCircuitLang('RUST_HALO2')}
+                className={`px-2.5 py-1 text-[9px] font-mono font-bold uppercase transition-all rounded-sm border ${
+                  circuitLang === 'RUST_HALO2'
+                    ? 'bg-orange-500 text-black border-orange-400'
+                    : 'bg-white/5 text-gray-400 border-white/10 hover:text-white'
+                }`}
+              >
+                RUST (HALO2)
+              </button>
+              <button
+                onClick={() => setCircuitLang('CIRCOM')}
+                className={`px-2.5 py-1 text-[9px] font-mono font-bold uppercase transition-all rounded-sm border ${
+                  circuitLang === 'CIRCOM'
+                    ? 'bg-purple-500 text-white border-purple-400'
+                    : 'bg-white/5 text-gray-400 border-white/10 hover:text-white'
+                }`}
+              >
+                CIRCOM 2.1.8
+              </button>
+              <button
+                onClick={() => setCircuitLang('SOLIDITY')}
+                className={`px-2.5 py-1 text-[9px] font-mono font-bold uppercase transition-all rounded-sm border ${
+                  circuitLang === 'SOLIDITY'
+                    ? 'bg-indigo-500 text-black border-indigo-400'
+                    : 'bg-white/5 text-gray-400 border-white/10 hover:text-white'
+                }`}
+              >
+                SOLIDITY (GROTH16)
+              </button>
+            </div>
+          </div>
+          <pre className="p-6 text-xs font-mono text-blue-300 overflow-x-auto custom-scrollbar leading-relaxed bg-[#050505]">
+            <code>
+              {circuitLang === 'RUST_HALO2'
+                ? RUST_HALO2_CIRCUIT
+                : circuitLang === 'CIRCOM'
+                  ? CIRCOM_2_CIRCUIT
+                  : SOLIDITY_GROTH16_VERIFIER}
+            </code>
+          </pre>
+        </Card>
+      </div>
+    </div>
+  );
 };
 
 export default ZKComplianceView;

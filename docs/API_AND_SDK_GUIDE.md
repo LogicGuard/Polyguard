@@ -3,7 +3,7 @@
 **Developer Integration Guide**  
 **Package:** `@polyguard/core-sdk`  
 **Version:** 4.2.0-STABLE  
-**Target Environment:** Node.js, Express, React, Web3 Frontend Applications  
+**Target Environment:** Node.js, Express, React, Web3 Frontend Applications
 
 ---
 
@@ -62,7 +62,6 @@ async function submitProtectedTransaction(rawTxHex: string) {
     // Submit via PolyGuard Encrypted Private RPC
     const txHash = await polyguard.sendViaPrivateRPC(rawTxHex);
     return txHash;
-
   } catch (error) {
     console.error('Transaction execution halted:', error);
   }
@@ -88,7 +87,7 @@ async function verifyContract(bytecode: string, sourceCode?: string) {
   console.log(`Security Score: ${result.score}/100`);
   console.log(`Vulnerabilities Found: ${result.vulnerabilities.length}`);
 
-  result.vulnerabilities.forEach(vuln => {
+  result.vulnerabilities.forEach((vuln) => {
     console.log(`[${vuln.severity}] ${vuln.title}: ${vuln.description}`);
     if (vuln.suggestedFix) {
       console.log(`Fix Suggestion:\n${vuln.suggestedFix}`);
@@ -102,12 +101,15 @@ async function verifyContract(bytecode: string, sourceCode?: string) {
 ## 4. REST & WebSocket API Reference
 
 ### Base URL
+
 `https://api.polyguard.io/v1`
 
 ### 4.1 POST `/v1/inspect-tx`
+
 Inspects raw transaction bytecode.
 
 **Request Body:**
+
 ```json
 {
   "rawTx": "0xf86c808504a817c8008252089471c...",
@@ -116,6 +118,7 @@ Inspects raw transaction bytecode.
 ```
 
 **Response:**
+
 ```json
 {
   "status": "success",
@@ -123,15 +126,15 @@ Inspects raw transaction bytecode.
   "threatLevel": "NOMINAL",
   "mevRisk": "LOW",
   "simulatedStateDiff": {
-    "balanceChanges": [
-      { "address": "0x71C...49A2", "delta": "-100.0 POL" }
-    ]
+    "balanceChanges": [{ "address": "0x71C...49A2", "delta": "-100.0 POL" }]
   }
 }
 ```
 
 ### 4.2 WebSocket Stream `/v1/mempool-stream`
+
 Subscribe to real-time security alerts:
+
 ```typescript
 const ws = new WebSocket('wss://api.polyguard.io/v1/mempool-stream?apiKey=YOUR_KEY');
 
@@ -143,4 +146,4 @@ ws.onmessage = (event) => {
 
 ---
 
-*Copyright © 2026 PolyGuard Security Infrastructure Inc. All Rights Reserved.*
+_Copyright © 2026 PolyGuard Security Infrastructure Inc. All Rights Reserved._
