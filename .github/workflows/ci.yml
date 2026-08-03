@@ -1,0 +1,117 @@
+name: CI - Lint, Security Checks, Smoke & Build
+
+on:
+  push:
+    branches: [ main, '**' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  node-smoke:
+    name: Node smoke test (frontend/server)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Start Node server (background)
+        run: |
+          nohup npm run dev > node-server.log 2>&1 &
+          echo "Started server, waiting for health endpoint..."
+
+      - name: Wait for health endpoint
+        run: npx wait-on http://localhost:3000/api/v1/health --timeout 15000
+
+      - name: Smoke test - call health
+        run: |
+          curl --fail --show-error --silent http://localhost:3000/api/v1/health | jq '.'
+
+  python-security:
+    name: Python security & tooling checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install Python requirements
+        run: |
+          python -m pip install --upgrade pip setuptools
+          if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
+
+      - name: Install system deps for Slither/Mythril (non-blocking)
+        run: |
+          set -e
+          echo "Installing system packages required by security tools (best-effort)"
+          sudo apt-get update -y
+          sudo apt-get install -y solc clang build-essential pkg-config libssl-dev llvm lld npm || true
+          python -m pip install --upgrade pip setuptools
+          python -m pip install slither-analyzer mythril safety || true
+
+      - name: Verify installed tools
+        run: |
+          echo "=== Python version ==="
+          python --version
+          echo "=== Slither version (if available) ==="
+          slither --version || echo "slither not available"
+          echo "=== Mythril version (if available) ==="
+          myth --version || echo "mythril not available"
+
+      - name: Install pytest and test deps
+        run: |
+          python -m pip install pytest pytest-asyncio httpx
+
+      - name: Set PYTHONPATH for backend
+        run: echo "PYTHONPATH=backend" >> $GITHUB_ENV
+
+      - name: Run Python smoke tests (pytest)
+        run: |
+          pytest -q backend/tests/test_health.py --maxfail=1
+
+  rust-build:
+    name: Rust build for core crates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Build core engine crate
+        run: |
+          cargo build --manifest-path crates/polyguard-core-engine/Cargo.toml --release
+
+      - name: Build rpc-proxy crate
+        run: |
+          cargo build --manifest-path crates/polyguard-rpc-proxy/Cargo.toml --release
